@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <base target="_blank" />
+    <title>互联网视频监控云 - 综合平台</title>
+    <link rel="stylesheet" href="./stylesheet/common.css">
+    <link rel="stylesheet" href="./stylesheet/layout.css">
+    <link rel="stylesheet" href="./stylesheet/home.css">
+
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-gl/echarts-gl.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-stat/ecStat.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/dataTool.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/china.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/world.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=ZUONbpqGBsYGXNIYHicvbAbM"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>
+</head>
+<body>
+    <header>
+        <div>
+            <img src="/imgs/qiniulogo.png" alt="">
+            <p>互联网视频监控云</p>
+        </div>
+        <div id="navbar"></div>
+    </header>
+    
+    <section>
+        <div id="wxb_home_leftpanel">
+            <div id="wxb_home_panel_1">
+                <table>
+                    <tr><td>综合指数</td><td class="wxb-home-panel-summary">77</td></tr>
+                    <tr><td>涉黄指数</td><td><div class="wxb-home-panel-1-green"></div></td><td>20</td></tr>
+                    <tr><td>涉暴指数</td><td><div class="wxb-home-panel-1-yellow"></div></td><td>50</td></tr>
+                    <tr><td>涉政指数</td><td><div class="wxb-home-panel-1-red"></div></td><td>80</td></tr>
+                </table>
+            </div>
+            <div>
+                <table id="wxb_home_static_table">
+                    <tr><td>当前监控任务数量:           </td><td>4</td><td>个</td></tr>
+                    <tr><td>当前所有有害信息数量:        </td><td>112133</td><td>条</td></tr>
+                    <tr><td>当前所有未处理有害信息数量:   </td><td>21313</td><td>条</td></tr>
+                    <tr><td>当前所有已处理有害信息数量:   </td><td>91231</td><td>条</td></tr>
+                    <tr><td>当前所有健康网站数量:       </td><td>3212</td><td>个</td></tr>
+                    <tr><td>当前所有黄色警告网站数量:    </td><td>1213</td><td>个</td></tr>
+                    <tr><td>当前所有红色警告网站数量:    </td><td>122</td><td>个</td></tr>
+                </table>
+            </div>
+
+            <div id="wxb_home_piechart" style="height: 25vh;"></div>
+        </div>
+        <div id="wxb_home_middlepanel">
+            <p>全国各大城市视频访问量分布</p>
+            <div id="wxb_home_map" style="height: 60vh"></div>
+        </div>
+        
+        <div id="wxb_home_rightpanel">
+            <p>当前传播节点较多的危害视频</p>
+            <table id="wxb_home_rightpanel_uptable">
+                <tr>
+                    <th>来源IP</th>
+                    <th>视频链接</th>
+                    <th>传播节点数</th>
+                </tr>
+                <tr><td>121.223.535.231</td><td>http://xxx.afer.cve/a.mp4</td><td>800</td></tr>
+                <tr><td>121.223.535.231</td><td>http://xxx.afer.cve/a.mp4</td><td>767</td></tr>
+                <tr><td>121.223.535.231</td><td>http://xxx.afer.cve/a.mp4</td><td>722</td></tr>
+                <tr><td>121.223.535.231</td><td>http://xxx.afer.cve/a.mp4</td><td>644</td></tr>
+                <tr><td>121.223.535.231</td><td>http://xxx.afer.cve/a.mp4</td><td>544</td></tr>
+                <tr><td>121.223.535.231</td><td>http://xxx.afer.cve/a.mp4</td><td>466</td></tr>
+            </table>
+
+            <p>疑似有害账户排行</p>
+            <table id="wxb_home_rightpanel_downtable">
+                <tr>
+                    <th>所属平台</th>
+                    <th>账户</th>
+                    <th>危害信息量</th>
+                </tr>
+                <tr><td>youtube</td><td>alpha</td><td>8010</td></tr>
+                <tr><td>twitter</td><td>beta</td><td>7627</td></tr>
+                <tr><td>youtube</td><td>gamma</td><td>7232</td></tr>
+                <tr><td>facebook</td><td>delta</td><td>6444</td></tr>
+                <tr><td>NetFlix</td><td>mu</td><td>5443</td></tr>
+                <tr><td>youtube</td><td>theta</td><td>4662</td></tr>
+                <tr><td>youtube</td><td>phi</td><td>4323</td></tr>
+            </table>
+        </div>
+    </section>
+
+
+    <footer>
+        <p>@copy right reserved by Qiniu</p>
+    </footer>
+
+    <div id="wxb_list_modal_detail_trace" class="component-hidden">
+        <div id="tracemap" style="height: 80vh; width: 80vw;"></div>
+    </div>
+
+    <script src="./javascript/config.js"></script>
+    <script src="./javascript/home.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,52 @@
+header {
+  height: 15vh;
+  display: flex;
+  align-items: center;
+  background-color: #f5f7fa;
+}
+header img {
+  height: 60%;
+  margin-left: 10%;
+}
+section {
+  height: 78vh;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+section > div {
+  box-shadow: 1rem 1rem 1rem 2px #aaa;
+  width: 30vw;
+  padding: 2rem;
+  height: 40vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+section > div p {
+  font-size: 1.8rem;
+  padding: 1rem;
+  color: white;
+}
+section > div a {
+  color: white;
+  font-size: 1.3rem;
+  line-height: 2rem;
+}
+section > div li {
+  list-style: none;
+}
+section > div:first-child {
+  background: url('../imgs/bg.jpeg');
+}
+section > div:last-child {
+  background: url('../imgs/bg2.jpeg');
+}
+footer {
+  height: 7vh;
+  text-align: center;
+}
+.wa-component-hidden {
+  display: none;
+}

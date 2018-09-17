@@ -1,0 +1,72 @@
+header {
+  text-align: center;
+  font-size: 2rem;
+  border-bottom: 1px solid grey;
+}
+#wxb_client_menu {
+  display: flex;
+  justify-content: space-between;
+}
+#wxb_client_imglist {
+  margin-top: 2rem;
+  display: flex;
+  flex-wrap: wrap;
+}
+#wxb_client_imglist img {
+  width: 250px;
+  height: 250px;
+  padding: 2rem;
+}
+#wxb_client_menu_gotoconsole:hover {
+  cursor: pointer;
+}
+#wxb_client_console_back {
+  font-size: 1rem;
+  padding: 1rem;
+  color: blue;
+}
+#wxb_client_console_back:before {
+  content: '\21E6';
+}
+#wxb_client_console_back:hover {
+  cursor: pointer;
+}
+#wxb_client_console_title {
+  text-align: center;
+  padding: 2rem;
+  font-size: 2rem;
+}
+#wxb_client_console_table {
+  width: 100%;
+  border-collapse: collapse;
+}
+#wxb_client_console_table td,
+#wxb_client_console_table th {
+  padding: .5rem;
+  border: 1px solid #aaa;
+  text-align: center;
+  height: 3rem;
+}
+#wxb_client_console_table td:hover,
+#wxb_client_console_table th:hover {
+  cursor: pointer;
+}
+#wxb_client_console_table td img,
+#wxb_client_console_table th img {
+  height: 100%;
+}
+#wxb_client_console_table td:last-child button {
+  margin: 0 1rem;
+  opacity: 0.6;
+}
+#wxb_client_console_table td:last-child button:hover {
+  opacity: 1;
+}
+.wxb-client-status-red {
+  background: red;
+  color: white;
+}
+.wxb-client-status-green {
+  background: #00c700;
+  color: white;
+}

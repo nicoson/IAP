@@ -1,0 +1,187 @@
+section > div {
+  width: 100%;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+table td,
+table th {
+  padding: .5rem;
+  border: 1px solid #aaa;
+  text-align: center;
+  height: 3rem;
+}
+table td img,
+table th img {
+  height: 15rem;
+}
+#wxb_list_table_container table {
+  margin-top: 2rem;
+}
+#wxb_list_table_container td:nth-of-type(2) {
+  text-decoration: underline;
+}
+#wxb_list_table_container td:nth-of-type(4) {
+  color: red;
+}
+#wxb_list_table_container td:nth-of-type(5) {
+  color: red;
+}
+#wxb_task_modal_createpanel #wxb_task_createpanel_title {
+  text-align: center;
+  font-size: 2rem;
+  padding: 1rem 0;
+  border: none;
+  width: 100%;
+  color: #777;
+}
+#wxb_task_modal_createpanel fieldset {
+  margin: 2rem 0;
+  padding: 2rem;
+  text-align: center;
+  width: 60vw;
+  margin: 3rem auto;
+  border: 1px solid #ccc;
+}
+#wxb_task_modal_createpanel fieldset legend {
+  font-size: 1.2rem;
+  padding: 0 2rem;
+  width: auto;
+}
+#wxb_task_modal_createpanel fieldset > div {
+  padding: 1rem;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+#wxb_task_modal_createpanel fieldset > div button {
+  margin: 0 1rem;
+}
+#wxb_task_modal_createpanel fieldset .wxb_task_createpanel_fs {
+  width: 100%;
+}
+#wxb_task_modal_createpanel fieldset .wxb_task_createpanel_fs label {
+  width: 20%;
+  font-size: 1rem;
+}
+#wxb_task_modal_createpanel fieldset .wxb_task_createpanel_fs input {
+  width: 60%;
+}
+#wxb_task_modal_createpanel fieldset #wxb_task_createpanel_form {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
+}
+#wxb_task_modal_createpanel fieldset #wxb_task_createpanel_form > div {
+  width: 100%;
+}
+#wxb_task_modal_createpanel fieldset #wxb_task_createpanel_form > div input {
+  width: 90%;
+}
+#wxb_task_modal_createpanel fieldset input {
+  font-size: 1rem;
+  padding: .5rem;
+  margin: 0;
+  width: 100%;
+}
+#wxb_task_modal_createpanel fieldset input#wxb_custom_forbidwords {
+  opacity: 1;
+}
+#wxb_task_modal_createpanel fieldset .input-group {
+  margin: 0!important;
+}
+#wxb_task_modal_createpanel fieldset button {
+  margin: 1rem auto 0 auto;
+}
+#wxb_task_detail_site_table {
+  margin-top: 2rem;
+}
+.wxb-task-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 999;
+}
+#wxb_list_modal_detail_trace {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 999;
+}
+#wxb_list_modal_detail_trace #tracemap {
+  background: rgba(255, 255, 255, 0.8);
+}
+#wxb_list_modal_addlist {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 999;
+  text-align: center;
+}
+#wxb_list_modal_addlist #wxb_list_applist {
+  background: rgba(255, 255, 255, 0.8);
+  height: 80vh;
+  width: 50vw;
+  padding: 2rem;
+}
+#wxb_list_modal_addlist #wxb_list_applist > div {
+  height: 60vh;
+  overflow: auto;
+  padding: 1rem;
+  border: 1px solid #aaa;
+}
+#wxb_list_modal_addlist #wxb_list_applist > div table label {
+  width: 100%;
+  display: block;
+}
+#wxb_list_modal_addlist #wxb_list_applist > div table label:hover {
+  cursor: pointer;
+}
+#wxb_list_modal_addlist button {
+  margin: 2rem;
+}
+.wxb-list-status-red {
+  height: 1.2rem;
+  background: #b90000;
+}
+.wxb-list-status-yellow {
+  height: 1.2rem;
+  background: yellow;
+}
+.wxb-list-status-green {
+  height: 1.2rem;
+  background: #0ac00a;
+}
+.js-wxb-task-modal-back {
+  font-size: 1rem;
+  padding: 1rem;
+}
+.js-wxb-task-modal-back:before {
+  content: '\21E6';
+}
+.js-wxb-task-modal-back:hover {
+  cursor: pointer;
+}

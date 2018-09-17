@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>about</title>
+    <link rel="stylesheet" href="./stylesheet/common.css">
+    <link rel="stylesheet" href="./stylesheet/layout.css">
+    <link rel="stylesheet" href="./stylesheet/config.css">
+    <style>
+        section {
+            display: flex;
+            justify-content: center;
+            background: ghostwhite;
+        }
+
+        img {
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <img src="/imgs/qiniulogo.png" alt="">
+            <p>互联网有害信息监控平台</p>
+        </div>
+        <div id="wa_home_navbar">
+            <a href="/home.html" target="_self">综合信息平台</a>
+            <a href="/list.html" target="_self">用户列表</a>
+            <!-- <a href="/detail.html" target="_self">用户详情</a> -->
+            <a class="wa-home-nav-selected" href="/about.html" target="_self">产品功能流程图</a>
+            <a href="/config.html" target="_self">配置</a>
+        </div>
+    </header>
+    <section>
+        <div>
+            <label for="">
+                进入黄色预警的时间:
+                <input id="wxb_config_yellow" type="text" placeholder="3000" />（单位：毫秒）
+            </label>
+            <label for="">
+                进入红色预警的时间:
+                <input id="wxb_config_red" type="text" placeholder="6000" />（单位：毫秒）
+            </label>
+            <button id="wxb_config_submit" class="btn-success">重置DEMO</button>
+        </div>
+    </section>
+    <footer>
+        <p>@copy right reserved by Qiniu</p>
+    </footer>
+    
+    <script src="./javascript/config.js"></script>
+    <script>
+        window.onload = function() {
+            document.querySelector('#wxb_config_yellow').value = YELLOW;
+            document.querySelector('#wxb_config_red').value = RED;
+
+            document.querySelector('#wxb_config_submit').addEventListener('click', e => {
+                let yellow = document.querySelector('#wxb_config_yellow').value;
+                let red = document.querySelector('#wxb_config_red').value;
+                localStorage.YELLOW = yellow;
+                localStorage.RED = red;
+                
+                fetch(APIHOST + '/resetconfig').then(e => {
+                    alert('重置完成！');
+                });
+            });
+        }
+    </script>
+</body>
+</html>

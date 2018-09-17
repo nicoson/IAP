@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>XX 网站</title>
+    <link rel="stylesheet" href="./stylesheet/common.css">
+    <link rel="stylesheet" href="./stylesheet/layout.css">
+    <link rel="stylesheet" href="./stylesheet/client.css">
+</head>
+<body>
+    <header>
+        XX 网站
+    </header>
+
+    <section>
+        <div id="wxb_client_userpanel">
+            <div id="wxb_client_menu">
+                <input type="file" id="wxb_client_imgselector" multiple />
+                <p id="wxb_client_menu_gotoconsole">控制台</p>
+            </div>
+            <div id="wxb_client_imglist"></div>
+        </div>
+        <div id="wxb_client_adminpanel" class="component-hidden">
+            <p><span id="wxb_client_console_back">返回</span></p>
+            <p id="wxb_client_console_title">内容控制台</p>
+            <table id="wxb_client_console_table">
+                <tr>
+                    <th>序号</th>
+                    <th>图像</th>
+                    <th>创建日期</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td><img src="" alt=""></td>
+                    <td>2018-01-01</td>
+                    <td>未处理</td>
+                    <td><button>禁止</button><button class="btn-success">放行</button></td>
+                </tr>
+            </table>
+        </div>
+    </section>
+
+    <footer>    
+        xxxx
+    </footer>
+    <div id="wxb_loading_modal" class="component-hidden"><p>加载中 ... ...</p></div>
+
+    <script src="./javascript/token.js"></script>
+    <script src="./javascript/cryptojs.js"></script>
+    <script src="./javascript/qiniu.min.js"></script>
+    <script src="./javascript/config.js"></script>
+    <script src="./javascript/client.js"></script>
+</body>
+</html>

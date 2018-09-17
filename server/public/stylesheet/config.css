@@ -1,0 +1,23 @@
+section {
+  flex-direction: column;
+  justify-content: center;
+}
+section > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 40vh;
+}
+section > div label {
+  font-size: 1.2rem;
+  margin: 1rem 0;
+}
+section > div label input {
+  padding: .5rem;
+  font-size: 1.2rem;
+  text-align: right;
+}
+section > div button {
+  margin: 2rem 0;
+}

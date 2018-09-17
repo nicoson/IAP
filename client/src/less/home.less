@@ -1,0 +1,132 @@
+section {
+    background: #0f3f5c;
+    display: flex;
+    align-items: center;
+    color: white;
+}
+
+#wxb_home_leftpanel {
+    width: 25vw;
+    height: 100%;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    font-size: .8rem;
+
+    >div {
+        background: #0e3852;
+        padding: 1rem;
+    }
+
+    #wxb_home_panel_1 {
+        width: 100%;
+
+        td {
+            padding: .3rem;
+            &:first-child {
+                width: 40%;
+            }
+            &:last-child {
+                width: 60%;
+            }
+
+            div {
+                height: 12px;
+            }
+        }
+
+        .wxb-home-panel-summary {
+            font-size: 2rem;
+            color: orange;
+        }
+        
+        .wxb-home-panel-1-green {
+            background: green;
+            width: 20%;
+        }
+        
+        .wxb-home-panel-1-yellow {
+            background: yellow;
+            width: 50%;
+        }
+        
+        .wxb-home-panel-1-red {
+            background: red;
+            width: 80%;
+        }
+    }
+
+    #wxb_home_static_table {
+        width: 100%;
+        td {
+            padding: .3rem;
+
+            &:nth-of-type(2) {
+                text-align: right;
+            }
+        }
+    }
+}
+
+#wxb_home_middlepanel {
+    >p {
+        font-size: 1.5rem;
+        color: white;
+        text-align: center;
+        padding: 2rem;
+    }
+    #wxb_home_map {
+        width: 50vw;
+        height: 77vh;
+    }
+}
+
+#wxb_home_rightpanel {
+    width: 25vw;
+    padding: 1rem;
+    font-size: .8rem;
+
+    >p {
+        text-align: center;
+        font-size: 1.2rem;
+        margin: 2rem 0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        
+        tr {
+            border: 1px solid rgba(255,255,255,.3);
+            &:hover {
+                background: #1f77a6;
+                cursor: pointer;
+            }
+        }
+
+        td {
+            padding: .5rem;
+            color: #dddddd;
+            text-align: center;
+        }
+    }
+}
+
+#wxb_list_modal_detail_trace {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0,0,0,0.7);
+    z-index: 999;
+
+    #tracemap {
+        background: rgba(255,255,255,0.8)
+    }
+}

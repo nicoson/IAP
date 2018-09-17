@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>常规任务设置</title>
+    <link rel="stylesheet" href="./stylesheet/common.css">
+    <link rel="stylesheet" href="./stylesheet/layout.css">
+    <link rel="stylesheet" href="./stylesheet/task.css">
+
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/echarts.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-gl/echarts-gl.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts-stat/ecStat.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/dataTool.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/china.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/map/js/world.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=ZUONbpqGBsYGXNIYHicvbAbM"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/echarts/extension/bmap.min.js"></script>
+    <script type="text/javascript" src="http://echarts.baidu.com/gallery/vendors/simplex.js"></script>
+</head>
+<body>
+    <header>
+        <div>
+            <img src="/imgs/qiniulogo.png" alt="">
+            <p>互联网视频监控云</p>
+        </div>
+        <div id="navbar"></div>
+    </header>
+
+    <section>
+        <div id="wxb_list_table_container">
+            <div>
+                <button id="wxb_task_btn_createtask" class="btn-success">新建任务</button>
+            </div>
+            <table id="wxb_list_table">
+                <tr>
+                    <th>序号</th>
+                    <th>任务名称</th>
+                    <th>监控站点数量</th>
+                    <th>健康站点数量</th>
+                    <th>问题站点数量</th>
+                    <th>违禁内容总量</th>
+                    <th>生成并导出报告</th>
+                </tr>
+            </table>
+        </div>
+        
+        <!-- <div id="wxb_task_modal_createpanel" class="component-hidden">
+            <p><span class="js-wxb-task-modal-back" data-path="1">返回</span></p>
+            <input id="wxb_task_createpanel_title" placeholder="点击修改任务名称"/>
+            <fieldset>
+                <legend>新建监控站点</legend>
+                <div class="wxb_task_createpanel_fs">
+                    <label for=""> APP主站名称：</label>
+                    <input type="text" name="" id="wxb_task_createpanel_domain" />
+                    <button id="wxb_task_createpanel_openlist" class="btn-info">从排行列表中选取</button>
+                </div>
+                <div>
+                    <label for="">监控时间段</label>
+                    从 <input type="date" value='2018-08-01' />
+                    到 <input type="date" value='2018-08-31'>
+                </div>
+                <div>
+                    <form id="wxb_task_createpanel_form" oninput="outvalue.value=Number(invalue.value).toFixed(2)">
+                        <label for="">调整告警阈值</label>
+                        <output for="wxb_task_createpanel_threshold" name='outvalue' value='0.8'>0.80</output>
+                        <div>
+                            0<input id="wxb_task_createpanel_threshold" type="range" name="invalue" min="0" max="1" step="0.05" value="0.8" />1
+                        </div>
+                    </form>
+                </div>
+                <button id="wxb_task_createpanel_addsite" class="btn-success">提交</button>
+            </fieldset>
+            <table id="wxb_task_detail_table">
+                <tr>
+                    <th>序号</th>
+                    <th>监控APP主站</th>
+                    <th>创建日期</th>
+                    <th>状态</th>
+                    <th>违禁内容</th>
+                    <th>导出报表</th>
+                </tr>
+            </table>
+        </div> -->
+
+        
+        <div id="wxb_task_modal_createpanel" class="component-hidden">
+            <p><span class="js-wxb-task-modal-back" data-path="1">返回</span></p>
+            <input id="wxb_task_createpanel_title" placeholder="点击修改任务名称"/>
+            <fieldset>
+                <legend>新建监控站点</legend>
+                <!-- <div class="wxb_task_createpanel_fs">
+                    <label for=""> APP主站名称：</label>
+                    <input type="text" name="" id="wxb_task_createpanel_domain" />
+                    <button id="wxb_task_createpanel_openlist" class="btn-info">从排行列表中选取</button>
+                </div> -->
+                <div>
+                    <label for="">监控时间段</label>
+                    从 <input type="date" value='2018-08-01' />
+                    到 <input type="date" value='2018-08-31'>
+                </div>
+                <div>
+                    <form id="wxb_task_createpanel_form" oninput="outvalue.value=Number(invalue.value).toFixed(2)">
+                        <label for="">调整鉴黄告警阈值</label>
+                        <output for="wxb_task_createpanel_threshold" name='outvalue' value='0.8'>0.80</output>
+                        <div>
+                            0<input id="wxb_task_createpanel_threshold" type="range" name="invalue" min="0" max="1" step="0.05" value="0.8" />1
+                        </div>
+                    </form>
+                </div>
+                <div>
+                    <form id="wxb_task_createpanel_form" oninput="outvalue.value=Number(invalue.value).toFixed(2)">
+                        <label for="">调整鉴暴告警阈值</label>
+                        <output for="wxb_task_createpanel_threshold" name='outvalue' value='0.8'>0.80</output>
+                        <div>
+                            0<input id="wxb_task_createpanel_threshold" type="range" name="invalue" min="0" max="1" step="0.05" value="0.8" />1
+                        </div>
+                    </form>
+                </div>
+                <div>
+                    <form id="wxb_task_createpanel_form" oninput="outvalue.value=Number(invalue.value).toFixed(2)">
+                        <label for="">调整鉴政告警阈值</label>
+                        <output for="wxb_task_createpanel_threshold" name='outvalue' value='0.8'>0.80</output>
+                        <div>
+                            0<input id="wxb_task_createpanel_threshold" type="range" name="invalue" min="0" max="1" step="0.05" value="0.8" />1
+                        </div>
+                    </form>
+                </div>
+                <div>
+                    <form id="wxb_task_createpanel_form" oninput="outvalue.value=Number(invalue.value).toFixed(2)">
+                        <label for="">调整低俗告警阈值</label>
+                        <output for="wxb_task_createpanel_threshold" name='outvalue' value='0.8'>0.80</output>
+                        <div>
+                            0<input id="wxb_task_createpanel_threshold" type="range" name="invalue" min="0" max="1" step="0.05" value="0.8" />1
+                        </div>
+                    </form>
+                </div>
+                <button id="wxb_task_createpanel_addsite" class="btn-success">提交</button>
+            </fieldset>
+            <table id="wxb_task_detail_table" class="component-hidden">
+                <tr>
+                    <th>序号</th>
+                    <th>监控APP主站</th>
+                    <th>创建日期</th>
+                    <th>状态</th>
+                    <th>违禁内容</th>
+                    <th>导出报表</th>
+                </tr>
+            </table>
+        </div>
+        
+        <div id="wxb_task_modal_detaillist" class="component-hidden">
+            <p><span class="js-wxb-task-modal-back" data-path="2">返回</span></p>
+            <!-- <p id="wxb_task_site_title">xx</p> -->
+            
+            <table id="wxb_task_detail_site_table">
+                <tr>
+                    <th>序号</th>
+                    <th>资源地址</th>
+                    <th>创建日期</th>
+                    <th>内容</th>
+                    <th>分类</th>
+                    <th>当前传播量</th>
+                    <th>传播路径详细</th>
+                    <th>导出报表</th>
+                </tr>
+                <tr><td>1</td><td>v.xxxx.com</td><td>2018-08-01</td><td><video width=200 controls><source src="http://pbvz06277.bkt.clouddn.com/o_1ciduni761og1ufohp0slb6b59.mp4" type="video/mp4"></video></td><td>淫秽</td><td>1234</td><td onclick="showTraceMap()" class="wxb-common-hover">传播图</td><td>导出</td></tr>
+                    <tr><td>1</td><td>v.xxxx.com</td><td>2018-08-01</td><td><video width=200 controls><source src="http://pbvz06277.bkt.clouddn.com/o_1ciduni761og1ufohp0slb6b59.mp4" type="video/mp4"></video></td><td>淫秽</td><td>1234</td><td onclick="showTraceMap()" class="wxb-common-hover">传播图</td><td>导出</td></tr>
+                    <tr><td>1</td><td>v.xxxx.com</td><td>2018-08-01</td><td><video width=200 controls><source src="http://pbvz06277.bkt.clouddn.com/o_1ciduni761og1ufohp0slb6b59.mp4" type="video/mp4"></video></td><td>淫秽</td><td>1234</td><td onclick="showTraceMap()" class="wxb-common-hover">传播图</td><td>导出</td></tr>
+                    <tr><td>1</td><td>v.xxxx.com</td><td>2018-08-01</td><td><video width=200 controls><source src="http://pbvz06277.bkt.clouddn.com/o_1ciduni761og1ufohp0slb6b59.mp4" type="video/mp4"></video></td><td>淫秽</td><td>1234</td><td onclick="showTraceMap()" class="wxb-common-hover">传播图</td><td>导出</td></tr>
+                    <tr><td>1</td><td>v.xxxx.com</td><td>2018-08-01</td><td><video width=200 controls><source src="http://pbvz06277.bkt.clouddn.com/o_1ciduni761og1ufohp0slb6b59.mp4" type="video/mp4"></video></td><td>淫秽</td><td>1234</td><td onclick="showTraceMap()" class="wxb-common-hover">传播图</td><td>导出</td></tr>
+                    <tr><td>1</td><td>v.xxxx.com</td><td>2018-08-01</td><td><video width=200 controls><source src="http://pbvz06277.bkt.clouddn.com/o_1ciduni761og1ufohp0slb6b59.mp4" type="video/mp4"></video></td><td>淫秽</td><td>1234</td><td onclick="showTraceMap()" class="wxb-common-hover">传播图</td><td>导出</td></tr>
+                    <tr><td>1</td><td>v.xxxx.com</td><td>2018-08-01</td><td><video width=200 controls><source src="http://pbvz06277.bkt.clouddn.com/o_1ciduni761og1ufohp0slb6b59.mp4" type="video/mp4"></video></td><td>淫秽</td><td>1234</td><td onclick="showTraceMap()" class="wxb-common-hover">传播图</td><td>导出</td></tr>
+                    <tr><td>1</td><td>v.xxxx.com</td><td>2018-08-01</td><td><video width=200 controls><source src="http://pbvz06277.bkt.clouddn.com/o_1ciduni761og1ufohp0slb6b59.mp4" type="video/mp4"></video></td><td>淫秽</td><td>1234</td><td onclick="showTraceMap()" class="wxb-common-hover">传播图</td><td>导出</td></tr>
+                </table>
+        </div>
+    </section>
+
+    <footer>
+        <p>@copy right reserved by Qiniu</p>
+    </footer>
+
+    <div id="wxb_list_modal_detail_trace" class="component-hidden">
+            <div id="tracemap" style="height: 80vh; width: 80vw;"></div>
+    </div>
+
+    <div id="wxb_list_modal_addlist" class="component-hidden">
+        <div id="wxb_list_applist">
+            <div>
+                <table>
+                    <tr>
+                        <th></th>
+                        <th>序号</th>
+                        <th>APP网站</th>
+                    </tr>
+                    <tr><td><label><input type="checkbox" /></label></td><td>1</td><td>www.youku.com</td></tr>
+                    <tr><td><label><input type="checkbox" /></label></td><td>2</td><td>v.qq.com</td></tr>
+                    <tr><td><label><input type="checkbox" /></label></td><td>3</td><td>www.iqiyi.com</td></tr>
+                    <tr><td><label><input type="checkbox" /></label></td><td>4</td><td>www.tudou.com</td></tr>
+                    <tr><td><label><input type="checkbox" /></label></td><td>5</td><td>www.panda.com</td></tr>
+                    <tr><td><label><input type="checkbox" /></label></td><td>6</td><td>www.pptv.com</td></tr>
+                    <tr><td><label><input type="checkbox" /></label></td><td>7</td><td>www.bilibili.com</td></tr>
+                    <tr><td><label><input type="checkbox" /></label></td><td>8</td><td>www.56.com</td></tr>
+                    <tr><td><label><input type="checkbox" /></label></td><td>9</td><td>www.6.com</td></tr>
+                    <tr><td><label><input type="checkbox" /></label></td><td>10</td><td>www.mangotv.com</td></tr>
+                    <tr><td><label><input type="checkbox" /></label></td><td>11</td><td>www.storm.com</td></tr>
+                    <tr><td><label><input type="checkbox" /></label></td><td>12</td><td>www.souhu.com</td></tr>
+                    <tr><td><label><input type="checkbox" /></label></td><td>13</td><td>www.sina.com</td></tr>
+                    <tr><td><label><input type="checkbox" /></label></td><td>14</td><td>www.hao123.com</td></tr>
+                    <tr><td><label><input type="checkbox" /></label></td><td>15</td><td>www.letv.com</td></tr>
+                    <tr><td><label><input type="checkbox" /></label></td><td>16</td><td>www.douyin.com</td></tr>
+                    <tr><td><label><input type="checkbox" /></label></td><td>17</td><td>www.huxiu.com</td></tr>
+                    <tr><td><label><input type="checkbox" /></label></td><td>18</td><td>www.douyu.com</td></tr>
+                    <tr><td><label><input type="checkbox" /></label></td><td>19</td><td>www.1644.com</td></tr>
+                    <tr><td><label><input type="checkbox" /></label></td><td>20</td><td>www.acfun.cn</td></tr>
+                </table>
+            </div>
+            <button id="wxb_task_modal_addlist_submit" class="btn-success">确定添加</button>
+        </div>
+    </div>
+    <script src="./javascript/config.js"></script>
+    <script src="./javascript/task.js"></script>
+</body>
+</html>
