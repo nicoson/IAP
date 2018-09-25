@@ -3,7 +3,8 @@ const mongo = require('mongodb').MongoClient;
 const URL = require('url');
 
 // const HOST = '127.0.0.1';
-const CONNECTION = "mongodb://192.168.33.99:47017/iap";
+// const CONNECTION = "mongodb://192.168.33.99:47017/iap";
+const CONNECTION = "mongodb://115.238.138.240:47017";
 const DATABASE = 'iap'
 
 function DBConn(){};
@@ -12,7 +13,7 @@ DBConn.createTable = function(table, key) {
     return new Promise(function(resolve, reject){
         mongo.connect(CONNECTION, function(err, db) {
             if (err) throw err;
-            console.log('db connect success ...');
+            console.log('|** DBConn.createTable **| db connect success ...');
             var dbase = db.db(DATABASE);
 
             // dbase.listCollections({name: table}, {nameOnly: true}).toArray(e => {
@@ -35,19 +36,17 @@ DBConn.createTable = function(table, key) {
 }
 
 DBConn.insertData = function(table, data) {
-    console.log(data.length);
+    console.log('|** DBConn.insertData **| total day num: ', data.length);
     return new Promise(function(resolve, reject){
         if(data.length == 0) reject('no data');
 
         mongo.connect(CONNECTION, function(err, db) {
             if (err) reject(err);
-            console.log('db connect success ...');
+            console.log('|** DBConn.insertData **| db connect success ...');
             var dbase = db.db(DATABASE);
 
             dbase.collection(table).insertMany(data, {ordered: false}, function(err, res) {
                 if (err) {
-                    console.log("err: ", err.result);
-                    console.log("detail: ", err.result.result.nInserted);
                     if(err.result.result.ok != 1) {
                         reject(err);
                     } else {
@@ -65,54 +64,113 @@ DBConn.insertData = function(table, data) {
 }
 
 DBConn.getDataFromDomain = function(table, size=100) {
-    let connection = mysql.createConnection({
-        host: HOST,
-        user: USER,
-        password: PASSWORD,
-        database: DATABASE
-    });
-
     return new Promise(function(resolve, reject){
-        connection.connect();
-        let sql = `select id, domain from ${table} where uid is NULL limit ${size}`;
+        mongo.connect(CONNECTION, function(err, db) {
+            if (err) reject(err);
+            console.log('|** DBConn.getDataFromDomain **| db connect success ...');
+            var dbase = db.db(DATABASE);
 
-        connection.query(sql, function(err, rows, fields) {
-            if (err) {
-                reject(err);
-            }
-            resolve(rows);
+            dbase.collection(table).find({uid: null}, {limit: size}).toArray(function(err, res) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(res);
+                }
+                
+                db.close();
+                return
+            });
         });
-        //  close connection
-        connection.end();
     });
 }
 
 DBConn.updateDomain = function(table, data) {
-    let connection = mysql.createConnection({
-        host: HOST,
-        user: USER,
-        password: PASSWORD,
-        database: DATABASE
-    });
-
-    let values = data.map(datum => `(${datum.id},"${datum.uid == null ? '-1' : datum.uid}",CURRENT_TIMESTAMP)`);
-
     return new Promise(function(resolve, reject){
-        connection.connect();
-        let sql = `insert into ${table} (id,uid,update_date) values ${values.join(',')}
-                    on duplicate key update uid=values(uid), update_date=values(update_date);`;
-
-        connection.query(sql, function(err, rows, fields) {
+        mongo.connect(CONNECTION, function(err, db) {
             if (err) {
                 reject(err);
+                return;
             }
-            resolve(rows);
+            console.log('|** DBConn.updateDomain **| db connect success ...');
+            var dbase = db.db(DATABASE);
+
+            let operations = data.map(datum => {return {
+                updateOne: {
+                    filter: {domain: datum.domain},
+                    update: {$set: {
+                        uid: datum.uid,
+                        update_date: datum.update_date
+                    }}
+                }
+            };})
+            dbase.collection(table).bulkWrite(operations, {ordered: false}, function(err, res) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(res);
+                }
+                
+                db.close();
+                return
+            });
         });
-        //  close connection
-        connection.end();
+    });
+}
+
+DBConn.getDataFromURL = function(table, size=100) {
+    return new Promise(function(resolve, reject){
+        mongo.connect(CONNECTION, function(err, db) {
+            if (err) reject(err);
+            console.log('|** DBConn.getDataFromURL **| db connect success ...');
+            var dbase = db.db(DATABASE);
+
+            dbase.collection(table).find({status: null}, {limit: size}).toArray(function(err, res) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(res);
+                }
+                
+                db.close();
+                return
+            });
+        });
     });
 }
 
 
-// console.log(DBConn.getData())
+DBConn.updateURL = function(table, data) {
+    return new Promise(function(resolve, reject){
+        mongo.connect(CONNECTION, function(err, db) {
+            if (err) {
+                reject(err);
+                return;
+            }
+            console.log('|** DBConn.updateURL **| db connect success ...');
+            var dbase = db.db(DATABASE);
+
+            let operations = data.map(datum => {return {
+                updateOne: {
+                    filter: {url: datum.url},
+                    update: {$set: {
+                        status: datum.status,
+                        type: datum.type,
+                        update_date: datum.update_date
+                    }}
+                }
+            };});
+            dbase.collection(table).bulkWrite(operations, {ordered: false}, function(err, res) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(res);
+                }
+                
+                db.close();
+                return
+            });
+        });
+    });
+}
+
 module.exports = DBConn;

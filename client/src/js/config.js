@@ -1,5 +1,5 @@
 // let APIHOST = 'http://localhost:3000';
-// let APIHOST = 'http://bocaqh5wg0g9.kegate-xs.cloudappl.com';
+let APIHOST = 'http://bocaqh5wg0g9.kegate-xs.cloudappl.com';
 
 if(sessionStorage.islogin == undefined || sessionStorage.islogin != 'true') {
     location.href = '/index.html';

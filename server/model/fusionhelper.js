@@ -5,18 +5,22 @@ const DBConn = require('./DBConnection');
 // const secretKey = "onBC_RiBMOa6cTvUDmpgpguDNZRz4Q_5oW5bkYlA";
 
 const DEFTONEHOST = 'http://deftonestraffic.fusion.internal.qiniu.io';  // get active domain for specified day
-const FUSIONHOST = 'http://analyze.deftone.internal.qiniu.io';          // get top 100 for domain
+// const FUSIONHOST = 'http://analyze.deftone.internal.qiniu.io';          // get top 100 for domain
 const FUSIONDOMAIN = 'http://fusiondomain.fusion.internal.qiniu.io';   // get uid by domain
-
-let newDomain = 0;
-let curCount = 0;
 
 class fusionHelper {
     constructor() {
+        this.LEN = 0;
+        this.curCount = 0;
+        this.DATA = [];
+        this.retry = 10000;
         DBConn.createTable('domain', 'domain').then(e => console.log(e));
         DBConn.createTable('url', 'url').then(e => console.log(e));
     }
 
+    /* ========================= *\
+          handle domain table
+    \* ========================= */
     getActiveDomain(day = new Date()) {
         let url = `${DEFTONEHOST}/v2/domain/online/day?day=${day.getFullYear()}${(day.getMonth()+101).toString().slice(1)}${(day.getDate()+100).toString().slice(1)}`;
         return new Promise(function(resolve, reject){
@@ -31,8 +35,9 @@ class fusionHelper {
     //  更新 <domain> 表
     updateDomain(day = new Date()) {
         this.getActiveDomain(day).then(data => {
-            newDomain = data.length;
             data = data.filter(e => e!='internal server error'&&e.length!=0);
+            this.LEN = data.length;
+            this.DATA = data;
             let timestamp = (new Date()).getTime();
             data = data.map(datum => {
                 return {
@@ -43,7 +48,7 @@ class fusionHelper {
                 }
             });
             DBConn.insertData('domain', data).then(num => {
-                console.log(`${num} of ${newDomain} active domains was inserted at ${day.toJSON()}`);
+                console.log(`${num} of ${this.LEN} active domains was inserted at ${day.toJSON()}`);
             }).catch(err => console.log(err));
         });
     }
@@ -51,7 +56,7 @@ class fusionHelper {
     getDomains(size) {
         return new Promise(function(resolve, reject) {
             DBConn.getDataFromDomain('domain', size).then(data => {
-                resolve(JSON.parse(JSON.stringify(data)));
+                resolve(data);
             }).catch(err => reject(err));
         });
     }
@@ -81,57 +86,108 @@ class fusionHelper {
     
                 Promise.all(p).then(res => {
                     console.log(res);
+                    let timestamp = (new Date()).getTime();
                     for(let i=0; i<data.length; i++) {
-                        data[i].uid = res[i];
+                        data[i].uid = res[i] ? res[i] : -1;
+                        data[i].update_date = timestamp;
                     }
 
                     DBConn.updateDomain('domain', data).then(res => {
                         resolve(1)
                     }).catch(err => resolve(1));
                 }).catch(err => reject(err));
-            });
+            }).catch(err => reject(err));
         }.bind(this));
     }
 
     //  更新 <domain> 表的 uid 字段
     updateUIDinDomain() {
-        let size = 100;
-        this.updateUIDinDomainSession(size).then(code => {
-            if(code == 1) {
-                curCount++;
-                console.log((100*curCount*size/newDomain).toFixed(2) + '% updated ...');
-                this.updateUIDinDomain();
-            } else {
-                console.log('update domain done!');
-            }
+        let size = 200;
+        try {
+            this.updateUIDinDomainSession(size).then(code => {
+                if(code == 1) {
+                    this.curCount++;
+                    console.log((100*this.curCount*size/this.LEN).toFixed(2) + '% updated ...');
+                    this.updateUIDinDomain();
+                } else {
+                    console.log('code: ', code);
+                    console.log('update domain done!');
+                }
+                this.retry = 10000; // reset retry time
+            });
+        }
+        catch(err) {
+            console.log(err);
+            setTimeout(this.updateUIDinDomain(), this.retry);
+            this.retry *= 10;
+        }
+    }
+
+
+    /* ========================= *\
+            handle url table
+    \* ========================= */
+    getTopUrl(domains, startDate, endDate) {
+        return new Promise(function(resolve, reject) {
+            // let url = `${FUSIONHOST}/v1/portal/topcounturl`;
+            let url = 'http://10.34.41.41:8998/v1/portal/topcounturl';
+            let postBody = {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(
+                    {
+                        "domains": domains,
+                        "freq": "1day",
+                        "region": "global",
+                        "startDate": startDate,
+                        "endDate": endDate
+                    }
+                )
+            };
+            
+            fetch(url, postBody).then(e => e.text()).then(data => {
+                resolve(JSON.parse(data));
+            }).catch(err => {
+                console.log(err);
+                reject(err);
+            });
         });
     }
 
-    getTopUrl(domain, startDate, endDate) {
-        let url = `${FUSIONHOST}/v1/portal/topcounturl`;
-        let headers = new Headers();
-        headers.append('Content-Type', 'application/json');
-        postBody = {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(
-                {
-                    "domains": domain,
-                    "freq": "1day",
-                    "region": "global",
-                    "startDate": startDate,
-                    "endDate": endDate
-                }
-            )
-        };
-        
-        fetch(url, postBody).then(e => e.text()).then(data => {
+    updateURLSession(domains, startDate, endDate) {
+        let p = [];
+        for(let i in domains) {
+            p.push(this.getTopUrl([domains[i]], startDate, endDate));
+        }
 
-        }).catch(err => console.log(err));
+        return new Promise(function(resolve, reject) {
+            let data = [];
+            let timestamp = (new Date()).getTime();
+            Promise.all(p).then(res => {
+                for(let i in res) {
+                    for(let j in res[i].data.urls) {
+                        data.push({
+                            url: res[i].data.urls[j],
+                            domain: domains[i],
+                            count: res[i].data.count[j],
+                            status: null,
+                            type: null,
+                            create_date: timestamp,
+                            update_date: timestamp
+                        });
+                    }
+                }
+
+                DBConn.insertData('url', data).then(res => {
+                    resolve('done');
+                }).catch(err => reject(err));
+            }).catch(err => reject(err));
+        });
     }
 
     updateURL() {
-        let range = 7;
+        let size = 1000;
+        let range = 1;
         let startDate = new Date();
         let endDate = new Date();
         startDate = new Date(startDate.setDate(startDate.getDate() - range));
@@ -139,8 +195,30 @@ class fusionHelper {
         startDate = `${startDate.getFullYear()}-${(startDate.getMonth()+101).toString().slice(1)}-${(startDate.getDate()+100).toString().slice(1)}-00-00`;
         endDate = `${endDate.getFullYear()}-${(endDate.getMonth()+101).toString().slice(1)}-${(endDate.getDate()+100).toString().slice(1)}-24-00`;
 
-
+        try {
+            let domains = this.DATA.slice(0,size);
+            this.updateURLSession(domains, startDate, endDate).then(e => {
+                this.DATA.splice(0,size);
+                if(this.DATA.length > 0) {
+                    console.log((100*(this.LEN - this.DATA.length)/this.LEN).toFixed(2) + '% inserted into URL table ...');
+                    this.updateURL();
+                } else {
+                    console.log('update domain done!');
+                }
+                this.retry = 10000; // reset retry time
+            });
+        }
+        catch(err) {
+            console.log(err);
+            setTimeout(this.updateURL(), this.retry);
+            this.retry *= 10;
+        }
     }
+
+
+    /* ========================= *\
+            update url table
+    \* ========================= */
 }
 
 module.exports = fusionHelper;

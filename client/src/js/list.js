@@ -180,12 +180,12 @@ function genExportTable(data) {
                         <td>${isCompany(USER[data[i].owner].IdentityInfo.type, USER[data[i].owner].IdentityInfo.status)?'企业':'个人'}</td>
                         <td>${USER[data[i].owner].IdentityInfo.enterprise_name}</td>
                         <td>'${USER[data[i].owner].IdentityInfo.enterprise_code}</td>
-                        <td>${USER[data[i].owner].IdentityInfo.contact_address}</td>
+                        <td>北京市 海淀区 新东方南楼 733</td>
                     </tr>`;
     }
     document.querySelector('#wa_list_table_export').innerHTML = temp + '</tbody>';
     let today = new Date();
-    $('#wa_list_table_export').tableExport({fileName: '上报文件 ' + getDateString(today),formats:['xls']});
+    $('#wa_list_table_export').tableExport({fileName: '上报文件 ' + getDateString(today),formats:['xlsx']});
     document.querySelector('#wa_list_table_export button').classList.toggle('btn-info');
     document.querySelector('#wa_list_table_export button').innerHTML = '导出excel文件';
 }
@@ -223,6 +223,8 @@ function isCompany(type, status) {
     if(status == 4 || status == 5) {
         return false;
     } else if(type == 1 || type == 2) {
+        return false;
+    } else if(type == 0 && status == 0) {
         return false;
     } else {
         return true;
