@@ -26,8 +26,8 @@
                 <button id="wa_list_filter_submit" class="btn-success" onclick="reloadData()">获取数据</button>
             </div>
             <div>
-                <!-- <button id="wa_list_filter_export" class="btn-info">导出excel</button> -->
-                <table id="wa_list_table_export"></table>
+                <button id="wa_list_filter_export" class="btn-info" onclick="exportExcel('wa_list_table_export')">导出excel</button>
+                <table id="wa_list_table_export" class="component-hidden"></table>
             </div>
         </div>
         
@@ -62,10 +62,7 @@
     </div>
 
     <script src="./javascript/config.js"></script>
-    <script src="./libs/js/jquery.min.js"></script>
-    <script src="./javascript/xls.core.min.js"></script>
     <script src="./javascript/filesaver.min.js"></script>
-    <script src="./javascript/tableexport.min.js"></script>
     <script src="./javascript/list.js"></script>
 </body>
 </html>
