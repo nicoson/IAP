@@ -53,6 +53,11 @@ class atlabHelper {
             return new Promise(function(resolve, reject) {
                 DBConn.getDataFromURL('url', size).then(data => {
                     let p = [];
+                    if(data.length == 0) {
+                        resolve('end');
+                        return;
+                    }
+
                     for(let datum of data) {
                         // console.log(datum.url);
                         p.push(this.censorCall(datum.url));

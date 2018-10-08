@@ -14,6 +14,7 @@ class acssHelper {
 
     getList(startDate, endDate) {
         let url = `${ACSSHOST}/api/reported/all?from=${startDate}&to=${endDate}`;
+        console.log('req address: ', url);
         return new Promise(function(resolve, reject){
             fetch(url).then(e => e.json()).then(data => {
                 resolve(data);

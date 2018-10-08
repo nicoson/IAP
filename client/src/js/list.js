@@ -137,6 +137,8 @@ function genExportTable(data) {
                         <th>md5</th>
                         <th>etag</th>
                         <th>文件名</th>
+                        <th>外链Domain</th>
+                        <th>外链key</th>
                         <th>文件类型</th>
                         <th>涉嫌违规类型</th>
                         <th>上传日期</th>
@@ -163,6 +165,8 @@ function genExportTable(data) {
                         <td>${data[i].md5}</td>
                         <td>${data[i].hash}</td>
                         <td>${data[i].filename}</td>
+                        <td>${data[i].domains.join(';')}</td>
+                        <td>${data[i].key}</td>
                         <td>${data[i].mimeType}</td>
                         <td>${data[i].type}</td>
                         <td>${getFullTime(data[i].putTime/10000)}</td>
