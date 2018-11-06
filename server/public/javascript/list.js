@@ -90,6 +90,8 @@ function fillSubTable(ele, datum, info) {
                         <tr><th>md5</th><td>${info.md5}</td></tr>
                         <tr><th>etag</th><td>${info.hash}</td></tr>
                         <tr><th>名称</th><td>${datum.DeveloperInfo.fullName}</td></tr>
+                        <tr><th>外链Domain</th><td>${info.domains.join('; \n')}</td></tr>
+                        <tr><th>外链key</th><td>${info.key}</td></tr>
                         <tr><th>联系电话</th><td>${datum.DeveloperInfo.phoneNumber}</td></tr>
                         <tr><th>email</th><td>${datum.DeveloperInfo.email}</td></tr>
                         <tr><th>注册时间</th><td>${(new Date(datum.DeveloperInfo.createAt/1000000)).toJSON().slice(0,-5).replace('T', ' ')}</td></tr>
@@ -137,6 +139,9 @@ function genExportTable(data) {
                         <th>md5</th>
                         <th>etag</th>
                         <th>文件名</th>
+                        <th>存储bucket</th>
+                        <th>外链Domain</th>
+                        <th>外链key</th>
                         <th>文件类型</th>
                         <th>涉嫌违规类型</th>
                         <th>上传日期</th>
@@ -163,6 +168,9 @@ function genExportTable(data) {
                         <td>${data[i].md5}</td>
                         <td>${data[i].hash}</td>
                         <td>${data[i].filename}</td>
+                        <td>${data[i].tbl}</td>
+                        <td>${data[i].domains.join(';')}</td>
+                        <td>${data[i].key}</td>
                         <td>${data[i].mimeType}</td>
                         <td>${data[i].type}</td>
                         <td>${getFullTime(data[i].putTime/10000)}</td>

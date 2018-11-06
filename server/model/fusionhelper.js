@@ -55,7 +55,7 @@ class fusionHelper {
 
     getDomains(size) {
         return new Promise(function(resolve, reject) {
-            DBConn.getDataFromDomain('domain', size).then(data => {
+            DBConn.queryData('domain', {uid: null}, size).then(data => {
                 resolve(data);
             }).catch(err => reject(err));
         });
@@ -92,7 +92,17 @@ class fusionHelper {
                         data[i].update_date = timestamp;
                     }
 
-                    DBConn.updateDomain('domain', data).then(res => {
+                    let operations = data.map(datum => {return {
+                        updateOne: {
+                            filter: {domain: datum.domain},
+                            update: {$set: {
+                                uid: datum.uid,
+                                update_date: datum.update_date
+                            }}
+                        }
+                    };});
+
+                    DBConn.updateData('domain', operations).then(res => {
                         resolve(1)
                     }).catch(err => resolve(1));
                 }).catch(err => reject(err));

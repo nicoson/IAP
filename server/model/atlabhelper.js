@@ -51,7 +51,7 @@ class atlabHelper {
     censorBatch(size = 100) {
         try {
             return new Promise(function(resolve, reject) {
-                DBConn.getDataFromURL('url', size).then(data => {
+                DBConn.queryData('url', {status: null}, size).then(data => {
                     let p = [];
                     if(data.length == 0) {
                         resolve('end');
@@ -74,7 +74,19 @@ class atlabHelper {
                             data[i].score = result.score;
                             data[i].update_date = timestamp;
                         }
-                        DBConn.updateURL('url', data).then(e => {
+
+                        let operations = data.map(datum => {return {
+                            updateOne: {
+                                filter: {url: datum.url},
+                                update: {$set: {
+                                    status: datum.status,
+                                    type: datum.type,
+                                    update_date: datum.update_date
+                                }}
+                            }
+                        };});
+
+                        DBConn.updateData('url', operations).then(e => {
                             resolve('done');
                         }).catch(err => reject(err));
                     }).catch(err => reject(err));

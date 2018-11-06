@@ -11,6 +11,7 @@ if(sessionStorage.islogin == undefined || sessionStorage.islogin != 'true') {
 let page = {
     // home:   '综合信息平台',
     // edit:   '编辑列表',
+    // admin:  '列表管理',
     list:   '列表'
 };
 let navbartmp = '';

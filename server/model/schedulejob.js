@@ -5,12 +5,33 @@ const fh = new fusionHelper();
 const ah = new atlabHelper();
 
 class scheduleJob {
-    constructor() {
-        this.batchsize = 200;
-        var job = schedule.scheduleJob('0 0 1 * * *', function(){
+    constructor(batchsize = 100, domainJobTriggerTime = 23, urlJobTriggerTime = 0, aiJobTriggerTime = 1) {
+        this.batchsize  = batchsize;
+        this.domainJobTriggerTime   = domainJobTriggerTime;
+        this.urlJobTriggerTime      = urlJobTriggerTime;
+        this.aiJobTriggerTime       = aiJobTriggerTime;
+        this.domainjob  = '';
+        this.urljob     = '';
+        this.aijob      = '';
+    }
+
+    initJobs() {
+        this.domainjob = schedule.scheduleJob(`0 0 ${this.domainJobTriggerTime} * * *`, function(){
             // console.log('job 1 works!');
             this.testUpdate();
         });
+        this.urljob = schedule.scheduleJob(`0 0 ${this.urlJobTriggerTime} * * *`, function(){
+            // console.log('job 1 works!');
+            this.testUpdate();
+        });
+        this.aiJob = schedule.scheduleJob(`0 0 ${this.aiJobTriggerTime} * * *`, function(){
+            // console.log('job 1 works!');
+            this.testUpdate();
+        });
+    }
+
+    destoryJobs() {
+
     }
 
     updateDomainTable() {

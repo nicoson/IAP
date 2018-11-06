@@ -1,9 +1,12 @@
 // const fs        = require('fs');
 const express     = require('express');
 const acssHelper  = require('../model/acsshelper');
+const jobHelper   = require('../model/schedulejob');
 const router      = express.Router();
 
 let ahelper = new acssHelper();
+let sjob    = new jobHelper();
+sjob.initJobs();
 
 /* GET login page. */
 router.get('/', function(req, res, next) {
@@ -15,7 +18,7 @@ router.get('/home', function(req, res, next) {
   res.render('home', { user: 'user1' });
 });
 
-/* GET home page. */
+/* GET list page. */
 router.get('/list', function(req, res, next) {
   res.render('list', { user: 'user1' });
 });
@@ -30,7 +33,11 @@ router.get('/custom', function(req, res, next) {
   res.render('custom', { title: 'login' });
 });
 
-// restful api
+
+
+/* ====================== *\
+        restful api 
+\* ====================== */
 router.post('/getall', function(req, res, next) {
   ahelper.getList(req.body.startDate, req.body.endDate).then(data => {
     res.send(data);

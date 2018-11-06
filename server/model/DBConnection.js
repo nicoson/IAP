@@ -4,11 +4,18 @@ const URL = require('url');
 
 // const HOST = '127.0.0.1';
 // const CONNECTION = "mongodb://192.168.33.99:47017/iap";
+// Product Env (Qiniu iap-mongo 华东二区)
+// const CONNECTION = "mongodb://180.97.147.185:27017";
+// Dev Env （xs group）
 const CONNECTION = "mongodb://115.238.138.240:47017";
 const DATABASE = 'iap'
 
 function DBConn(){};
 
+/* 
+    table:   需要创建的表名
+    key:     索引字段 unique
+*/
 DBConn.createTable = function(table, key) {
     return new Promise(function(resolve, reject){
         mongo.connect(CONNECTION, function(err, db) {
@@ -35,6 +42,7 @@ DBConn.createTable = function(table, key) {
     });
 }
 
+// insert data if not exist
 DBConn.insertData = function(table, data) {
     console.log('|** DBConn.insertData **| total day num: ', data.length);
     return new Promise(function(resolve, reject){
@@ -63,14 +71,14 @@ DBConn.insertData = function(table, data) {
     });
 }
 
-DBConn.getDataFromDomain = function(table, size=100) {
+DBConn.queryData = function(table, conditions = {}, size=100) {
     return new Promise(function(resolve, reject){
         mongo.connect(CONNECTION, function(err, db) {
             if (err) reject(err);
-            console.log('|** DBConn.getDataFromDomain **| db connect success ...');
+            console.log('|** DBConn.queryData **| db connect success ...');
             var dbase = db.db(DATABASE);
 
-            dbase.collection(table).find({uid: null}, {limit: size}).toArray(function(err, res) {
+            dbase.collection(table).find(conditions, {limit: size}).toArray(function(err, res) {
                 if (err) {
                     reject(err);
                 } else {
@@ -84,81 +92,17 @@ DBConn.getDataFromDomain = function(table, size=100) {
     });
 }
 
-DBConn.updateDomain = function(table, data) {
+// update with different conditions
+DBConn.updateData = function(table, operations) {
     return new Promise(function(resolve, reject){
         mongo.connect(CONNECTION, function(err, db) {
             if (err) {
                 reject(err);
                 return;
             }
-            console.log('|** DBConn.updateDomain **| db connect success ...');
+            console.log('|** DBConn.updateData **| db connect success ...');
             var dbase = db.db(DATABASE);
 
-            let operations = data.map(datum => {return {
-                updateOne: {
-                    filter: {domain: datum.domain},
-                    update: {$set: {
-                        uid: datum.uid,
-                        update_date: datum.update_date
-                    }}
-                }
-            };})
-            dbase.collection(table).bulkWrite(operations, {ordered: false}, function(err, res) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(res);
-                }
-                
-                db.close();
-                return
-            });
-        });
-    });
-}
-
-DBConn.getDataFromURL = function(table, size=100) {
-    return new Promise(function(resolve, reject){
-        mongo.connect(CONNECTION, function(err, db) {
-            if (err) reject(err);
-            console.log('|** DBConn.getDataFromURL **| db connect success ...');
-            var dbase = db.db(DATABASE);
-
-            dbase.collection(table).find({status: null}, {limit: size}).toArray(function(err, res) {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(res);
-                }
-                
-                db.close();
-                return
-            });
-        });
-    });
-}
-
-
-DBConn.updateURL = function(table, data) {
-    return new Promise(function(resolve, reject){
-        mongo.connect(CONNECTION, function(err, db) {
-            if (err) {
-                reject(err);
-                return;
-            }
-            console.log('|** DBConn.updateURL **| db connect success ...');
-            var dbase = db.db(DATABASE);
-
-            let operations = data.map(datum => {return {
-                updateOne: {
-                    filter: {url: datum.url},
-                    update: {$set: {
-                        status: datum.status,
-                        type: datum.type,
-                        update_date: datum.update_date
-                    }}
-                }
-            };});
             dbase.collection(table).bulkWrite(operations, {ordered: false}, function(err, res) {
                 if (err) {
                     reject(err);
