@@ -19,11 +19,11 @@ class scheduleJob {
         this.domainjob = schedule.scheduleJob(`0 0 ${this.domainJobTriggerTime} * * *`, function(){
             console.log('==============>    domainjob start ...!');
             this.testUpdate();
-        }.bin(this));
+        }.bind(this));
         this.urljob = schedule.scheduleJob(`0 0 ${this.urlJobTriggerTime} * * *`, function(){
             console.log('==============>    urljob start ...!');
             this.testUpdate();
-        }.bin(this));
+        }.bind(this));
         // this.aiJob = schedule.scheduleJob(`0 0 ${this.aiJobTriggerTime} * * *`, function(){
         //     console.log('==============>    aijob start ...!');
         //     this.testUpdate();
