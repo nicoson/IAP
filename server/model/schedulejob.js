@@ -17,17 +17,17 @@ class scheduleJob {
 
     initJobs() {
         this.domainjob = schedule.scheduleJob(`0 0 ${this.domainJobTriggerTime} * * *`, function(){
-            // console.log('job 1 works!');
+            console.log('==============>    domainjob start ...!');
             this.testUpdate();
-        });
+        }.bin(this));
         this.urljob = schedule.scheduleJob(`0 0 ${this.urlJobTriggerTime} * * *`, function(){
-            // console.log('job 1 works!');
+            console.log('==============>    urljob start ...!');
             this.testUpdate();
-        });
-        this.aiJob = schedule.scheduleJob(`0 0 ${this.aiJobTriggerTime} * * *`, function(){
-            // console.log('job 1 works!');
-            this.testUpdate();
-        });
+        }.bin(this));
+        // this.aiJob = schedule.scheduleJob(`0 0 ${this.aiJobTriggerTime} * * *`, function(){
+        //     console.log('==============>    aijob start ...!');
+        //     this.testUpdate();
+        // }.bin(this));
     }
 
     destoryJobs() {

@@ -43,7 +43,7 @@ class acssHelper {
                 let p = [];
                 for(let uid of uids) {
                     p.push(this.getInfoByUid(uid));
-                    console.log(uid);
+                    // console.log(uid);
                 }
                 Promise.all(p).then(data => {
                     // console.log(data);
@@ -59,8 +59,8 @@ class acssHelper {
                         }
                     }
 
-                    console.log('=======>  total data: ', datum.length);
-                    console.log('          filter data: ', list.length);
+                    console.log('=======>  list total data: ', datum.length);
+                    console.log('          list filter data: ', list.length);
 
                     resolve({
                         list: list,

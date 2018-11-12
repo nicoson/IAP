@@ -6,7 +6,7 @@ const router      = express.Router();
 
 let ahelper = new acssHelper();
 let sjob    = new jobHelper();
-sjob.initJobs();
+sjob.initJobs();  // start schedule jobs
 
 /* GET login page. */
 router.get('/', function(req, res, next) {
