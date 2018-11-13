@@ -4,8 +4,9 @@ const atlabHelper = require('./atlabhelper');
 const fh = new fusionHelper();
 const ah = new atlabHelper();
 
+// use UTC time zone
 class scheduleJob {
-    constructor(batchsize = 100, domainJobTriggerTime = 23, urlJobTriggerTime = 0, aiJobTriggerTime = 1) {
+    constructor(batchsize = 100, domainJobTriggerTime = 23-8, urlJobTriggerTime = 24-8, aiJobTriggerTime = 25-8) {
         this.batchsize  = batchsize;
         this.domainJobTriggerTime   = domainJobTriggerTime;
         this.urlJobTriggerTime      = urlJobTriggerTime;
@@ -18,16 +19,16 @@ class scheduleJob {
     initJobs() {
         this.domainjob = schedule.scheduleJob(`0 0 ${this.domainJobTriggerTime} * * *`, function(){
             console.log('==============>    domainjob start ...!');
-            this.testUpdate();
+            this.updateDomainTable();
         }.bind(this));
         this.urljob = schedule.scheduleJob(`0 0 ${this.urlJobTriggerTime} * * *`, function(){
             console.log('==============>    urljob start ...!');
-            this.testUpdate();
+            this.updateURLTable();
         }.bind(this));
-        // this.aiJob = schedule.scheduleJob(`0 0 ${this.aiJobTriggerTime} * * *`, function(){
-        //     console.log('==============>    aijob start ...!');
-        //     this.testUpdate();
-        // }.bin(this));
+        this.aiJob = schedule.scheduleJob(`0 0 ${this.aiJobTriggerTime} * * *`, function(){
+            console.log('==============>    aijob start ...!');
+            this.updateURLTableByAPI();
+        }.bind(this));
     }
 
     destoryJobs() {
@@ -49,7 +50,7 @@ class scheduleJob {
         let endTime = [4,0,0];
         let today = new Date();
         let date = [today.getFullYear(), today.getMonth(), today.getDate()];
-        if(today.getTime < new Date(...date, ...endTime).getTime()) {
+        if(today.getTime() < new Date(...date, ...endTime).getTime()) {
             ah.censorBatch(this.batchsize).then(e => {
                 if(e == 'end') {
                     console.log('INFO: ', today, ' job done!');
