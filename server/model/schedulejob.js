@@ -37,7 +37,8 @@ class scheduleJob {
 
     updateDomainTable() {
         console.log("INFO: Domain job started ", new Date());
-        fh.updateDomain(day = new Date());
+        fh.init();
+        fh.updateDomain(new Date());
         fh.updateUIDinDomain();
     }
 

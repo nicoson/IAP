@@ -10,12 +10,16 @@ const FUSIONDOMAIN = 'http://fusiondomain.fusion.internal.qiniu.io';   // get ui
 
 class fusionHelper {
     constructor() {
+        this.init();
+        DBConn.createTable('domain', 'domain').then(e => console.log(e));
+        DBConn.createTable('url', 'url').then(e => console.log(e));
+    }
+
+    init() {
         this.LEN = 0;
         this.curCount = 0;
         this.DATA = [];
         this.retry = 10000;
-        DBConn.createTable('domain', 'domain').then(e => console.log(e));
-        DBConn.createTable('url', 'url').then(e => console.log(e));
     }
 
     /* ========================= *\
@@ -124,12 +128,14 @@ class fusionHelper {
                     console.log('update domain done!');
                 }
                 this.retry = 10000; // reset retry time
+                console.log(`INFO: current retry interval is set to ${this.retry} ms`);
             });
         }
         catch(err) {
             console.log(err);
             setTimeout(this.updateUIDinDomain(), this.retry);
-            this.retry *= 10;
+            this.retry *= 1.1;
+            console.log(`WARNING: current retry interval is set to ${this.retry} ms`);
         }
     }
 
