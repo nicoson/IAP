@@ -20,6 +20,7 @@ class fusionHelper {
         this.curCount = 0;
         this.DATA = [];
         this.retry = 10000;
+        this.status = 0;
     }
 
     /* ========================= *\
@@ -39,7 +40,7 @@ class fusionHelper {
     //  更新 <domain> 表
     updateDomain(day = new Date()) {
         this.getActiveDomain(day).then(data => {
-            data = data.filter(e => e!='internal server error'&&e.length!=0);
+            data = data.filter(e => e!='internal server error' && e.length!=0);
             this.LEN = data.length;
             this.DATA = data;
             let timestamp = (new Date()).getTime();
@@ -52,7 +53,9 @@ class fusionHelper {
                 }
             });
             DBConn.insertData('domain', data).then(num => {
-                console.log(`${num} of ${this.LEN} active domains was inserted at ${day.toJSON()}`);
+                this.LEN = num;
+                this.status = 1;
+                console.log(`${num} active domains was inserted at ${day.toJSON()}`);
             }).catch(err => console.log(err));
         });
     }
@@ -92,7 +95,7 @@ class fusionHelper {
                 }
     
                 Promise.all(p).then(res => {
-                    console.log(res);
+                    // console.log(res);
                     let timestamp = (new Date()).getTime();
                     for(let i=0; i<data.length; i++) {
                         data[i].uid = res[i] ? res[i] : -1;
@@ -124,7 +127,7 @@ class fusionHelper {
             this.updateUIDinDomainSession(size).then(code => {
                 if(code == 1) {
                     this.curCount++;
-                    console.log((100*this.curCount*size/this.LEN).toFixed(2) + '% updated ...');
+                    console.log(`${(curCount*size*100/this.LEN).toFixed(2)} new data updated ...`);
                     this.updateUIDinDomain();
                 } else {
                     console.log('code: ', code);
@@ -216,6 +219,10 @@ class fusionHelper {
 
         try {
             let domains = this.DATA.slice(0,size);
+            if(domains.length == 0) {
+                console.log('update domain done!');
+                return;
+            }
             this.updateURLSession(domains, startDate, endDate).then(e => {
                 this.DATA.splice(0,size);
                 if(this.DATA.length > 0) {

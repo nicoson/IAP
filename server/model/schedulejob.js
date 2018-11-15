@@ -18,33 +18,47 @@ class scheduleJob {
 
     initJobs() {
         this.domainjob = schedule.scheduleJob(`0 0 ${this.domainJobTriggerTime} * * *`, function(){
-            console.log('==============>    domainjob start ...!');
-            this.updateDomainTable();
-        }.bind(this));
-        this.urljob = schedule.scheduleJob(`0 0 ${this.urlJobTriggerTime} * * *`, function(){
-            console.log('==============>    urljob start ...!');
+            console.log('==============>    domainjob start ...!   <=============');
+            console.log('|** schecule.initJobs **| INFO: start to update domain', new Date());
+            fh.init();
+            fh.updateDomain(new Date());
+            this.updateUID();
             this.updateURLTable();
         }.bind(this));
-        this.aiJob = schedule.scheduleJob(`0 0 ${this.aiJobTriggerTime} * * *`, function(){
-            console.log('==============>    aijob start ...!');
-            this.updateURLTableByAPI();
-        }.bind(this));
+        // this.urljob = schedule.scheduleJob(`0 0 ${this.urlJobTriggerTime} * * *`, function(){
+        //     console.log('==============>    urljob start ...!');
+        //     this.updateURLTable();
+        // }.bind(this));
+        // this.aiJob = schedule.scheduleJob(`0 0 ${this.aiJobTriggerTime} * * *`, function(){
+        //     console.log('==============>    aijob start ...!');
+        //     this.updateURLTableByAPI();
+        // }.bind(this));
     }
 
     destoryJobs() {
 
     }
 
-    updateDomainTable() {
-        console.log("INFO: Domain job started ", new Date());
-        fh.init();
-        fh.updateDomain(new Date());
-        fh.updateUIDinDomain();
+    updateUID() {
+        if (fh.status != 1) {
+            setTimeout(this.updateUID, 10000);
+            console.log('|** schecule.updateUID **| INFO: updateDomain not ready, delay 10s to exec');
+        } else {
+            console.log("|** schecule.updateUID **| INFO: start to update UID ", new Date());
+            fh.updateUIDinDomain();
+        }
     }
 
     updateURLTable() {
-        console.log("INFO: url job started ", new Date());
-        fh.updateURL();
+        if (fh.status != 1) {
+            setTimeout(this.updateURLTable, 100000);
+            console.log('|** schecule.updateURLTable **| INFO: updateDomain not ready, delay 100s to exec');
+        } else {
+            console.log("|** schecule.updateURLTable **| INFO: url job started ", new Date());
+            fh.updateURL();
+        }
+        // console.log("INFO: url job started ", new Date());
+        // fh.updateURL();
     }
 
     updateURLTableByAPI() {

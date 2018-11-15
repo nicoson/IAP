@@ -1,11 +1,13 @@
 const fusionHelper = require('./fusionhelper');
-const DBConn = require('./DBConnection');
-const atlabHelper = require('./atlabhelper');
 const jobHelper   = require('./schedulejob');
 
 let fh = new fusionHelper();
-let ah = new atlabHelper();
 let jh = new jobHelper();
+
+
+const DBConn = require('./DBConnection');
+const atlabHelper = require('./atlabhelper');
+let ah = new atlabHelper();
 
 fh.updateDomain(new Date()).then(e => e.json()).then(e => console.log(e));
 
