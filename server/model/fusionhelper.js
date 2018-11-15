@@ -81,7 +81,10 @@ class fusionHelper {
     updateUIDinDomainSession(size) {
         return new Promise(function(resolve, reject) {
             this.getDomains(size).then(data => {
-                if(data.length == 0) resolve(-1);
+                if(data.length == 0) {
+                    resolve(-1);
+                    return;
+                }
 
                 let p = [];
                 for(let datum of data) {
