@@ -4,6 +4,7 @@ const jobHelper   = require('./schedulejob');
 let fh = new fusionHelper();
 let jh = new jobHelper();
 
+jh.updateDomainURLTable()
 
 const DBConn = require('./DBConnection');
 const atlabHelper = require('./atlabhelper');

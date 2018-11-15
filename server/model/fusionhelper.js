@@ -5,7 +5,7 @@ const DBConn = require('./DBConnection');
 // const secretKey = "onBC_RiBMOa6cTvUDmpgpguDNZRz4Q_5oW5bkYlA";
 
 const DEFTONEHOST = 'http://deftonestraffic.fusion.internal.qiniu.io';  // get active domain for specified day
-// const FUSIONHOST = 'http://analyze.deftone.internal.qiniu.io';          // get top 100 for domain
+const FUSIONHOST = 'http://analyze.deftone.internal.qiniu.io';          // get top 100 for domain
 const FUSIONDOMAIN = 'http://fusiondomain.fusion.internal.qiniu.io';   // get uid by domain
 
 class fusionHelper {
@@ -127,7 +127,7 @@ class fusionHelper {
             this.updateUIDinDomainSession(size).then(code => {
                 if(code == 1) {
                     this.curCount++;
-                    console.log(`${(this.curCount*size*100/this.LEN).toFixed(2)} new data updated ...`);
+                    console.log(`${this.curCount*size} new data updated ...`);
                     this.updateUIDinDomain();
                 } else {
                     console.log('code: ', code);
@@ -151,8 +151,8 @@ class fusionHelper {
     \* ========================= */
     getTopUrl(domains, startDate, endDate) {
         return new Promise(function(resolve, reject) {
-            // let url = `${FUSIONHOST}/v1/portal/topcounturl`;
-            let url = 'http://10.34.41.41:8998/v1/portal/topcounturl';
+            let url = `${FUSIONHOST}/v1/portal/topcounturl`;
+            // let url = 'http://10.34.41.41:8998/v1/portal/topcounturl';   // debug portal
             let postBody = {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
