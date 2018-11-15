@@ -19,11 +19,7 @@ class scheduleJob {
     initJobs() {
         this.domainjob = schedule.scheduleJob(`0 0 ${this.domainJobTriggerTime} * * *`, function(){
             console.log('==============>    domainjob start ...!   <=============');
-            console.log('|** schecule.initJobs **| INFO: start to update domain', new Date());
-            fh.init();
-            fh.updateDomain(new Date());
-            this.updateUID();
-            this.updateURLTable();
+            this.updateDomainURLTable();
         }.bind(this));
         // this.urljob = schedule.scheduleJob(`0 0 ${this.urlJobTriggerTime} * * *`, function(){
         //     console.log('==============>    urljob start ...!');
@@ -37,6 +33,14 @@ class scheduleJob {
 
     destoryJobs() {
 
+    }
+
+    updateDomainURLTable() {
+        console.log('|** schecule.initJobs **| INFO: start to update domain', new Date());
+        fh.init();
+        fh.updateDomain(new Date());
+        this.updateUID();
+        this.updateURLTable();
     }
 
     updateUID() {

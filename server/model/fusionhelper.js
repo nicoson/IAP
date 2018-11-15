@@ -127,7 +127,7 @@ class fusionHelper {
             this.updateUIDinDomainSession(size).then(code => {
                 if(code == 1) {
                     this.curCount++;
-                    console.log(`${(curCount*size*100/this.LEN).toFixed(2)} new data updated ...`);
+                    console.log(`${(this.curCount*size*100/this.LEN).toFixed(2)} new data updated ...`);
                     this.updateUIDinDomain();
                 } else {
                     console.log('code: ', code);
