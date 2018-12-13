@@ -55,7 +55,7 @@ class fusionHelper {
             DBConn.insertData('domain', data).then(num => {
                 this.LEN = num;
                 this.status = 1;
-                console.log(`${num} active domains was inserted at ${day.toJSON()}`);
+                console.log(`${num} active domains was inserted at ${day.toJSON()}   ${new Date()}`);
             }).catch(err => console.log(err));
         });
     }
@@ -131,7 +131,7 @@ class fusionHelper {
                     this.updateUIDinDomain();
                 } else {
                     console.log('code: ', code);
-                    console.log('update domain done!');
+                    console.log('update domain done!   ', new Date());
                 }
                 this.retry = 10000; // reset retry time
                 console.log(`INFO: current retry interval is set to ${this.retry} ms`);
@@ -220,16 +220,16 @@ class fusionHelper {
         try {
             let domains = this.DATA.slice(0,size);
             if(domains.length == 0) {
-                console.log('update domain done!');
+                console.log('update domain done!   ', new Date());
                 return;
             }
             this.updateURLSession(domains, startDate, endDate).then(e => {
                 this.DATA.splice(0,size);
                 if(this.DATA.length > 0) {
-                    console.log((100*(this.LEN - this.DATA.length)/this.LEN).toFixed(2) + '% inserted into URL table ...');
+                    console.log(size + ' new data inserted into URL table ...');
                     this.updateURL();
                 } else {
-                    console.log('update domain done!');
+                    console.log('update domain done!   ', new Date());
                 }
                 this.retry = 10000; // reset retry time
             });

@@ -44,7 +44,7 @@ DBConn.createTable = function(table, key) {
 
 // insert data if not exist
 DBConn.insertData = function(table, data) {
-    console.log('|** DBConn.insertData **| total day num: ', data.length);
+    console.log('|** DBConn.insertData **| total insert data num: ', data.length);
     return new Promise(function(resolve, reject){
         if(data.length == 0) reject('no data');
 
