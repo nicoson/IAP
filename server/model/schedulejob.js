@@ -1,7 +1,7 @@
 const schedule = require('node-schedule');
 const fusionHelper = require('./fusionhelper');
 const atlabHelper = require('./atlabhelper');
-const fh = new fusionHelper();
+let fh = new fusionHelper();
 const ah = new atlabHelper();
 
 // use UTC time zone
@@ -37,6 +37,7 @@ class scheduleJob {
 
     updateDomainURLTable() {
         console.log('|** schecule.initJobs **| INFO: start to update domain', new Date());
+        // should initialize fusionHelp each time trigger, as status show be changed
         fh.init();
         fh.updateDomain(new Date());
         this.updateUID();
@@ -45,8 +46,8 @@ class scheduleJob {
 
     updateUID() {
         if (fh.status != 1) {
-            setTimeout(function(){return this.updateUID();}.bind(this), 60000);
-            console.log('|** schecule.updateUID **| INFO: updateDomain not ready, delay 1mins to exec');
+            setTimeout(function(){return this.updateUID();}.bind(this), 600000);
+            console.log('|** schecule.updateUID **| INFO: updateDomain not ready, delay 10mins to exec');
         } else {
             console.log("|** schecule.updateUID **| INFO: start to update UID ", new Date());
             fh.updateUIDinDomain();
@@ -55,8 +56,8 @@ class scheduleJob {
 
     updateURLTable() {
         if (fh.status != 1) {
-            setTimeout(function(){return this.updateURLTable();}.bind(this), 300000);
-            console.log('|** schecule.updateURLTable **| INFO: updateDomain not ready, delay 5mins to exec');
+            setTimeout(function(){return this.updateURLTable();}.bind(this), 600000);
+            console.log('|** schecule.updateURLTable **| INFO: updateDomain not ready, delay 10mins to exec');
         } else {
             console.log("|** schecule.updateURLTable **| INFO: url job started ", new Date());
             fh.updateURL();

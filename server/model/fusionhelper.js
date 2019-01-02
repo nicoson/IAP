@@ -208,7 +208,7 @@ class fusionHelper {
     }
 
     updateURL() {
-        let size = 1000;
+        let size = 500;
         let range = 1;
         let startDate = new Date();
         let endDate = new Date();

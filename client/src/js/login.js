@@ -5,7 +5,7 @@ if(sessionStorage.islogin != undefined && sessionStorage.islogin == 'true') {
 }
 
 let userlist = {
-    admin: 'admin',
+    admin: `i7Niu!@#$&*()`,
     wajsk: 'wajsk'
 }
 

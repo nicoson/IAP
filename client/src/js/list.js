@@ -280,7 +280,7 @@ function exportExcel(tableid) {
         oXL.Visible = true;
 
         try {
-            var fname = oXL.Application.GetSaveAsFilename("Excel.xls", "Excel Spreadsheets (*.xls), *.xls");
+            var fname = oXL.Application.GetSaveAsFilename(`上报文件 ${getDateString(new Date())}.xls`, "Excel Spreadsheets (*.xls), *.xls");
         } catch (e) {
             print("Nested catch caught " + e);
         } finally {
@@ -304,7 +304,7 @@ function Cleanup() {
 
 //判断浏览器后调用的方法，把table的id传入即可
 function tableToExcel(table, name) {
-    var template = `<html><head><meta charset="UTF-8"></head><body><table>${document.getElementById(table).innerHTML}</table></body></html>`
+    var template = `<html><head><meta charset="UTF-8"><style>td,th{border: 0.5px solid black;}</style></head><body><table>${document.getElementById(table).innerHTML}</table></body></html>`
     var blob = new Blob([template], {
         type: "application/vnd.ms-excel;charset=charset=utf-8"
     });
