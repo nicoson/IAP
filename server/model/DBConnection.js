@@ -12,7 +12,7 @@ function DBConn(){};
 */
 DBConn.createTable = function(table, key) {
     return new Promise(function(resolve, reject){
-        mongo.connect(CONNECTION, function(err, db) {
+        mongo.connect(CONNECTION, {useNewUrlParser: true}, function(err, db) {
             if (err) throw err;
             console.log(`|** DBConn.createTable <${table}> **| db connect success ...`);
             let dbase = db.db(DATABASE);
@@ -39,7 +39,7 @@ DBConn.insertData = function(table, data) {
     return new Promise(function(resolve, reject){
         if(data.length == 0) reject('no data');
 
-        mongo.connect(CONNECTION, function(err, db) {
+        mongo.connect(CONNECTION, {useNewUrlParser: true}, function(err, db) {
             if (err) reject(err);
             console.log(`|** DBConn.insertData <${table}> **| db connect success ...`);
             let dbase = db.db(DATABASE);
@@ -65,7 +65,7 @@ DBConn.insertData = function(table, data) {
 
 DBConn.queryData = function(table, conditions = {}, size=100, skip=0) {
     return new Promise(function(resolve, reject){
-        mongo.connect(CONNECTION, function(err, db) {
+        mongo.connect(CONNECTION, {useNewUrlParser: true}, function(err, db) {
             if (err) reject(err);
             console.log(`|** DBConn.queryData <${table}> **| db connect success ...`);
             let dbase = db.db(DATABASE);
@@ -98,7 +98,7 @@ DBConn.queryData = function(table, conditions = {}, size=100, skip=0) {
 */
 DBConn.updateData = function(table, operations) {
     return new Promise(function(resolve, reject){
-        mongo.connect(CONNECTION, function(err, db) {
+        mongo.connect(CONNECTION, {useNewUrlParser: true}, function(err, db) {
             if (err) {
                 reject(err);
                 return;
@@ -122,7 +122,7 @@ DBConn.updateData = function(table, operations) {
 
 DBConn.count = function(table, conditions={}) {
     return new Promise(function(resolve, reject) {
-        mongo.connect(CONNECTION, function(err, db) {
+        mongo.connect(CONNECTION, {useNewUrlParser: true}, function(err, db) {
             if(err) {
                 reject(err);
                 return;
@@ -146,7 +146,7 @@ DBConn.count = function(table, conditions={}) {
 
 DBConn.distinct = function(table, field={}) {
     return new Promise(function(resolve, reject) {
-        mongo.connect(CONNECTION, function(err, db) {
+        mongo.connect(CONNECTION, {useNewUrlParser: true}, function(err, db) {
             if(err) {
                 reject(err);
                 return;

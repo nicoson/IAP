@@ -37,23 +37,23 @@ class atlabHelper {
         this.options.headers.Authorization = token;
 
         return new Promise(function(resolve, reject){
-            if(url.search(/.png|.jpg|.jpeg|.webp|.bmp|.gif/i) < 0) {
-                console.log('xxxxxxxxxxxxx> url:', url);
+            // console.log('============> get: ', url);
+            if(this.fileType(url) == 'image') {
+                fetch(APIHOST, this.options).then(e => e.json()).then(data => {
+                    resolve(data);
+                }).catch(err => reject(err));
+            } else if(this.fileType(url) == 'video') {
                 resolve(-1);
-                return;
+            } else {
+                resolve(-1);
             }
-            console.log('============> get: ', url);
-            fetch(APIHOST, this.options).then(e => e.json()).then(data => {
-                resolve(data);
-            }).catch(err => reject(err));
         }.bind(this));
     }
 
-    censorBatch(size = 100, concurrency = 5) {
+    async censorBatch(size=1000, concurrency=50) {
         try {
             return new Promise(function(resolve, reject) {
-                DBConn.queryData('url', {status: null}, size).then(data => {
-                    let p = [];
+                DBConn.queryData('url', {status: null}, size).then(async function(data){
                     if(data.length == 0) {
                         resolve({
                             code: 204,
@@ -63,42 +63,69 @@ class atlabHelper {
                     }
 
                     let index = 0
+                    let saveCount = 0;
                     let concurrenctCount = 0;
                     let timestamp = (new Date()).getTime();
                     let resData = [];
+                    let startRecord = new Date().getTime()
 
-                    while(concurrenctCount < concurrency && index < data.length) {
-                        let datum = data[index];
-                        index++;
-                        concurrenctCount++;
+                    while(true) {
+                        if(concurrenctCount < concurrency && index < data.length) {
+                            
+                            let datum = data[index];
+                            index++;
+                            concurrenctCount++;
 
-                        this.censorCall(datum.url).then(res => {
-                            let result = this.resHandler(res);
-                            datum.status = 1;
-                            datum.type = result.type;
-                            datum.score = result.score;
-                            datum.update_date = timestamp;
-                            resData.push(datum);
-                            concurrenctCount--;
-
-                            // ending condition
-                            if(concurrenctCount == 0 && index == data.length) {
-                                this.saveData(resData, index);
-                                resolve({
-                                    code: 200,
-                                    msg: 'job done'
-                                });
-                                break;
-                            } else if(resData.length > concurrency) {
-                                // save partal results
-                                this.saveData(resData.splice(0, concurrenctCount), index);
-                            }
-                        }).catch(err => {
-                            console.log(err);
-                            concurrenctCount--;
-                        });
+                            this.censorCall(datum.url).then(res => {
+                                try {
+                                    let result = this.resHandler(res);
+                                    datum.status = 1;
+                                    datum.illegaltype = result.type;
+                                    datum.isillegal = result.isillegal;
+                                    datum.score = result.score;
+                                    datum.machineresult = res;
+                                    datum.update_date = timestamp;
+                                    datum.filetype = this.fileType(datum.url);
+                                    resData.push(datum);
+                                    concurrenctCount--;
+    
+                                    // ending condition
+                                    if(concurrenctCount == 0 && index == data.length) {
+                                        saveCount++;
+                                        this.saveData(resData, Math.round(saveCount*concurrency/data.length*100));
+                                        resolve({
+                                            code: 200,
+                                            msg: 'job done'
+                                        });
+                                        console.log(`[INFO] |** atlabhelper.censorBatch <${new Date()}> **| Current job done, totally cost: ${new Date().getTime() - startRecord}ms.`);
+                                        return;
+                                    } else if(resData.length > concurrency) {
+                                        // save partal results
+                                        saveCount++;
+                                        this.saveData(resData.splice(0, concurrency), Math.round(saveCount*concurrency/data.length*100));
+                                    }
+                                }
+                                catch(err) {
+                                    console.log(`[ERROR] |** atlabhelper.censorBatch <${new Date()}> **| CensorCall result handle error msg: ${err}`);
+                                    concurrenctCount--;
+                                }
+                            }).catch(err => {
+                                console.log(`[ERROR] |** atlabhelper.censorBatch <${new Date()}> **| CensorCall error catch msg: ${err}`);
+                                concurrenctCount--;
+                            });
+                        } else if(index >= data.length) {
+                            console.log('current loop index: # ', saveCount);
+                            console.log(concurrenctCount,index,saveCount,data.length);
+                            console.log(`[INFO] |** atlabhelper.censorBatch <${new Date()}> **| While-loop end ...`);
+                            break;
+                        } else {
+                            console.log('sleeeeeeeeeeeeeeeeeeping ...');
+                            await new Promise(function(resolve, reject){
+                                setTimeout(function(){resolve(1)}, 200);
+                            });
+                        }
                     }
-                }).catch(err => reject({
+                }.bind(this)).catch(err => reject({
                     code: 500,
                     msg: 'job failed',
                     err: err
@@ -106,46 +133,54 @@ class atlabHelper {
             }.bind(this));
         }
         catch(err) {
-            console.log(err);
-            return this.censorBatch(size);
+            console.log(`[ERROR] |** atlabhelper.censorBatch <${new Date()}> **| While-loop error msg: ${err}`);
+            return {
+                code: 500,
+                msg: 'job failed'
+            };
         }
     }
 
-    saveData(data, index=0) {
+    saveData(data, process=0) {
         let operations = data.map(datum => {return {
             updateOne: {
                 filter: {url: datum.url},
                 update: {$set: {
                     status: datum.status,
-                    type: datum.type,
+                    illegaltype: datum.type,
+                    isillegal: datum.isillegal,
+                    score: datum.score,
+                    machineresult: datum.machineresult,
+                    filetype: datum.filetype,
                     update_date: datum.update_date
                 }}
             }
         };});
 
-        console.log(index, data);
         DBConn.updateData('url', operations).then(e => {
-            console.log(`${index} data updated !`);
-        }).catch(err => console.log(`${index} data update failed due to: ${err}`));
+            console.log(`${process}% data has been updated !`);
+        }).catch(err => console.log(`data update failed due to: ${err}`));
     }
 
     resHandler(data) {
         if(data == -1) {
             console.log('data: no data');
             return {
+                isillegal: 0,
                 type: 'unknown file',
                 score: -1
             }
         } else if (data.error) {
             console.log('data: image size too small < 32x32');
             return {
+                isillegal: 0,
                 type: 'small image file',
                 score: -1
             }
         } else if (data.code == 0) {
-            // console.log('data: ', data.result.details);
             if(data.result.label == 0) {
                 return {
+                    isillegal: 0,
                     type: 'normal',
                     score: data.result.score
                 }
@@ -172,10 +207,27 @@ class atlabHelper {
                 }
                 
                 return {
-                    type:  type,
+                    isillegal: 1,
+                    type: type,
                     score: data.result.score
                 }
             }
+        } else {
+            return {
+                isillegal: 0,
+                type: 'unknown file',
+                score: -2
+            }
+        }
+    }
+
+    fileType(url) {
+        if(url.search(/\.png|\.jpg|\.jpeg|\.webp|\.bmp|\.gif/i) > -1) {
+            return 'image';
+        } else if(url.search(/\.rm|\.mp4|\.avi|\.wmv|\.3gp/i) > -1) {
+            return 'video';
+        } else {
+            return 'unknown';
         }
     }
 }
