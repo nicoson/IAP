@@ -49,55 +49,84 @@ class atlabHelper {
         }.bind(this));
     }
 
-    censorBatch(size = 100) {
+    censorBatch(size = 100, concurrency = 5) {
         try {
             return new Promise(function(resolve, reject) {
                 DBConn.queryData('url', {status: null}, size).then(data => {
                     let p = [];
                     if(data.length == 0) {
-                        resolve('end');
+                        resolve({
+                            code: 204,
+                            msg: 'empty queue'
+                        });
                         return;
                     }
 
-                    for(let datum of data) {
-                        // console.log(datum.url);
-                        p.push(this.censorCall(datum.url));
-                    }
-    
+                    let index = 0
+                    let concurrenctCount = 0;
                     let timestamp = (new Date()).getTime();
-    
-                    Promise.all(p).then(res => {
-                        // console.log('res: ',res);
-                        for(let i in res) {
-                            let result = this.resHandler(res[i]);
-                            data[i].status = 1;
-                            data[i].type = result.type;
-                            data[i].score = result.score;
-                            data[i].update_date = timestamp;
-                        }
+                    let resData = [];
 
-                        let operations = data.map(datum => {return {
-                            updateOne: {
-                                filter: {url: datum.url},
-                                update: {$set: {
-                                    status: datum.status,
-                                    type: datum.type,
-                                    update_date: datum.update_date
-                                }}
+                    while(concurrenctCount < concurrency && index < data.length) {
+                        let datum = data[index];
+                        index++;
+                        concurrenctCount++;
+
+                        this.censorCall(datum.url).then(res => {
+                            let result = this.resHandler(res);
+                            datum.status = 1;
+                            datum.type = result.type;
+                            datum.score = result.score;
+                            datum.update_date = timestamp;
+                            resData.push(datum);
+                            concurrenctCount--;
+
+                            // ending condition
+                            if(concurrenctCount == 0 && index == data.length) {
+                                this.saveData(resData, index);
+                                resolve({
+                                    code: 200,
+                                    msg: 'job done'
+                                });
+                                break;
+                            } else if(resData.length > concurrency) {
+                                // save partal results
+                                this.saveData(resData.splice(0, concurrenctCount), index);
                             }
-                        };});
-
-                        DBConn.updateData('url', operations).then(e => {
-                            resolve('done');
-                        }).catch(err => reject(err));
-                    }).catch(err => reject(err));
-                }).catch(err => reject(err));
+                        }).catch(err => {
+                            console.log(err);
+                            concurrenctCount--;
+                        });
+                    }
+                }).catch(err => reject({
+                    code: 500,
+                    msg: 'job failed',
+                    err: err
+                }));
             }.bind(this));
         }
         catch(err) {
             console.log(err);
             return this.censorBatch(size);
         }
+    }
+
+    saveData(data, index=0) {
+        let operations = data.map(datum => {return {
+            updateOne: {
+                filter: {url: datum.url},
+                update: {$set: {
+                    status: datum.status,
+                    type: datum.type,
+                    update_date: datum.update_date
+                }}
+            }
+        };});
+
+        console.log(index, data);
+        DBConn.updateData('url', operations).then(e => {
+            console.log(`${index} data updated !`);
+        }).catch(err => console.log(`${index} data update failed due to: ${err}`));
     }
 
     resHandler(data) {
@@ -125,12 +154,12 @@ class atlabHelper {
                 for(let item of data.result.details) {
                     switch(item.type) {
                         case 'pulp':
-                            if(item.label == 0 && item.score >= 0.99) {
+                            if(item.label == 0 && item.score >= 0.90) {
                                 type.push('色情');
                             }
                             break;
                         case 'terror':
-                            if(item.label == 1 && item.score >= 0.99) {
+                            if(item.label == 1 && item.score >= 0.90) {
                                 type.push('暴力 - ' + item.class);
                             }
                             break;
@@ -143,7 +172,7 @@ class atlabHelper {
                 }
                 
                 return {
-                    type:  type.join(';'),
+                    type:  type,
                     score: data.result.score
                 }
             }
