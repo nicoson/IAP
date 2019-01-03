@@ -1,5 +1,5 @@
 if(sessionStorage.islogin != undefined && sessionStorage.islogin == 'true') {
-    location.href = '/list.html';
+    location.href = '/kodo.html';
 } else {
     // document.querySelector('section').removeAttribute('class');
 }
