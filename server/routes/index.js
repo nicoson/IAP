@@ -1,10 +1,12 @@
 // const fs        = require('fs');
 const express     = require('express');
 const acssHelper  = require('../model/acsshelper');
+const appHelper  = require('../model/apphelper');
 const jobHelper   = require('../model/schedulejob');
 const router      = express.Router();
 
 let ahelper = new acssHelper();
+let apphelper = new appHelper();
 let sjob    = new jobHelper();
 sjob.initJobs();  // start schedule jobs
 
@@ -38,6 +40,7 @@ router.get('/custom', function(req, res, next) {
 /* ====================== *\
         restful api 
 \* ====================== */
+//  KODO ACSS api
 router.post('/getall', function(req, res, next) {
   ahelper.getList(req.body.startDate, req.body.endDate).then(data => {
     res.send(data);
@@ -52,6 +55,22 @@ router.post('/getbyuid', function(req, res, next) {
 
 router.post('/getalldetail', function(req, res, next) {
   ahelper.getListAll(req.body.startDate, req.body.endDate).then(data => {
+    res.send(data);
+  }).catch(err => res.send(err));
+});
+
+
+//  fusion api
+router.post('/getfusiondata', function(req, res, next) {
+  let conditions = {
+		$and: [
+			{isillegal: 1},
+			{update_date: {$gt: new Date(req.body.startDate).getTime()}},
+			{update_date: {$lt: new Date(req.body.endDate).getTime()+86400000}}
+		]
+  };
+  console.log(JSON.stringify(conditions));
+  apphelper.getIllegalDataFromUrlTable(conditions).then(data => {
     res.send(data);
   }).catch(err => res.send(err));
 });

@@ -189,17 +189,17 @@ class atlabHelper {
                 for(let item of data.result.details) {
                     switch(item.type) {
                         case 'pulp':
-                            if(item.label == 0 && item.score >= 0.90) {
+                            if(item.label == 0) {
                                 type.push('色情');
                             }
                             break;
                         case 'terror':
-                            if(item.label == 1 && item.score >= 0.90) {
+                            if(item.label == 1) {
                                 type.push('暴力 - ' + item.class);
                             }
                             break;
                         case 'politician':
-                            if(item.label == 1 && item.score >= 0.7) {
+                            if(item.label == 1) {
                                 type.push('敏感人物 - ' + item.more[0].value.name);
                             }
                             break;
