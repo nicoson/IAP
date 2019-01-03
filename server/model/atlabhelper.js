@@ -1,9 +1,10 @@
 const fetch = require('node-fetch');
 const DBConn = require('./DBConnection');
 const genToken  = require('./genToken');
+const CONFIG = require('./config');
 let gt = new genToken();
 
-const APIHOST = 'http://ai.qiniuapi.com/v1/image/censor';  // get active domain for specified day
+const APIHOST = CONFIG.CENSORIMGAPI;  // get active domain for specified day
 
 
 class atlabHelper {

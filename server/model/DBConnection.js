@@ -1,14 +1,10 @@
 //connection to database
 const mongo = require('mongodb').MongoClient;
+const CONFIG = require('./config');
 // const URL = require('url');
 
-// const HOST = '127.0.0.1';
-// const CONNECTION = "mongodb://192.168.33.99:47017/iap";
-// Product Env (Qiniu iap-mongo 华东二区)
-const CONNECTION = "mongodb://180.97.147.185:27017";
-// Dev Env （cs1/gpu2）
-// const CONNECTION = "mongodb://10.200.20.91:27017";
-const DATABASE = 'iap'
+const CONNECTION = CONFIG.MONGODB;
+const DATABASE = CONFIG.DATABASE;
 
 function DBConn(){};
 

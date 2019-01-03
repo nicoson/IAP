@@ -1,12 +1,13 @@
 const fetch = require('node-fetch');
 const DBConn = require('./DBConnection');
+const CONFIG = require('./config');
 
 // const accessKey = "M-G8vwdVdmKYKk50ZdCcIyizX1ItahHnJN-lWsSG";
 // const secretKey = "onBC_RiBMOa6cTvUDmpgpguDNZRz4Q_5oW5bkYlA";
 
-const DEFTONEHOST = 'http://deftonestraffic.fusion.internal.qiniu.io';  // get active domain for specified day
-const FUSIONHOST = 'http://analyze.deftone.internal.qiniu.io';          // get top 100 for domain
-const FUSIONDOMAIN = 'http://fusiondomain.fusion.internal.qiniu.io';   // get uid by domain
+const DEFTONEHOST = CONFIG.DEFTONEHOST;  // get active domain for specified day
+const FUSIONHOST = CONFIG.FUSIONHOST;          // get top 100 for domain
+const FUSIONDOMAIN = CONFIG.FUSIONDOMAIN;   // get uid by domain
 
 class fusionHelper {
     constructor() {

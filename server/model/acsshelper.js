@@ -1,11 +1,12 @@
 // const request = require('request');
 // const qiniu = require("qiniu");
 const fetch = require('node-fetch');
+const CONFIG = require('./config');
 
 // const accessKey = "M-G8vwdVdmKYKk50ZdCcIyizX1ItahHnJN-lWsSG";
 // const secretKey = "onBC_RiBMOa6cTvUDmpgpguDNZRz4Q_5oW5bkYlA";
 
-const ACSSHOST = 'http://10.34.35.36:8082';
+const ACSSHOST = CONFIG.ACSSHOST;
 
 class acssHelper {
     constructor() {

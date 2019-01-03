@@ -1,8 +1,8 @@
 const fetch = require('node-fetch');
 const qiniu = require("qiniu");
-const DBConn = require('./DBConnection');
+const CONFIG = require('./config');
 
-const APIHOST = 'http://uc.qbox.me';  // get active domain for specified day
+const RSFHOST = CONFIG.RSFHOST;  // get active domain for specified day
 
 
 class kodoHelper {
@@ -30,7 +30,7 @@ class kodoHelper {
     \* ========================= */
     //  get bucket list for uid
     getBucketList(uid) {
-        let api = `${APIHOST}/admin/buckets/uid/${uid}`;
+        let api = `${RSFHOST}/admin/buckets/uid/${uid}`;
         let token = this.genToken(api, this.options.body);
         this.options.headers.Authorization = token;
 
@@ -43,7 +43,7 @@ class kodoHelper {
 
     //  get all bucket details info for uid
     getBucketsInfo(uid) {
-        let api = `${APIHOST}/admin/allbuckets?limit=100&uid=${uid}`;
+        let api = `${RSFHOST}/admin/allbuckets?limit=100&uid=${uid}`;
         let token = this.genToken(api, this.options.body);
         this.options.headers.Authorization = token;
 
@@ -56,7 +56,7 @@ class kodoHelper {
 
     //  get file list from bucket by itbl
     getFileList(region, itbl, marker=null) {
-        let api = `${APIHOST}/admin/listbyitbl?region=${region}&itbl=${itbl}&limit=100${marker?('&marker='+marker):''}`;
+        let api = `${RSFHOST}/admin/listbyitbl?region=${region}&itbl=${itbl}&limit=100${marker?('&marker='+marker):''}`;
         let token = this.genToken(api, this.options.body);
         this.options.headers.Authorization = token;
 
