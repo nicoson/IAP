@@ -47,8 +47,8 @@ class scheduleJob {
 
     updateUID() {
         if (fh.status != 1) {
-            setTimeout(function(){return this.updateUID();}.bind(this), 600000);
-            console.log('|** schecule.updateUID **| INFO: updateDomain not ready, delay 10mins to exec');
+            setTimeout(function(){return this.updateUID();}.bind(this), 300000);
+            console.log('|** schecule.updateUID **| INFO: updateDomain not ready, delay 5mins to exec');
         } else {
             console.log("|** schecule.updateUID **| INFO: start to update UID ", new Date());
             fh.updateUIDinDomain();

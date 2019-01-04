@@ -59,6 +59,7 @@ function fillListTable(data) {
                     <th>文件名</th>
                     <th>文件类型</th>
                     <th>涉嫌违规类型</th>
+                    <th>分值</th>
                     <th>状态</th>
                 </tr>`;
 
@@ -66,10 +67,11 @@ function fillListTable(data) {
         list += `<tr class="wa-list-table-tr-main" onclick="toggleTableRow(event)" data-ind="${i}">
                     <td>${Number(i)+1}</td>
                     <td>${new Date(data[i].update_date).toJSON().slice(0,19).replace('T', ' ')}</td>
-                    <td><img src="${data[i].url}" /></td>
+                    <td><a href="${data[i].url}" target="_blank"><img src="${data[i].url}" /></a></td>
                     <td><p>${data[i].url.split('/').slice(-1)[0]}</p></td>
                     <td>${data[i].filetype}</td>
                     <td>${data[i].illegaltype}</td>
+                    <td>${data[i].score}</td>
                     <td>${data[i].status}</td>
                 </tr>
                 <tr class="component-hidden"></tr>

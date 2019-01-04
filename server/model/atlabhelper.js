@@ -80,7 +80,7 @@ class atlabHelper {
                                 try {
                                     let result = this.resHandler(res);
                                     datum.status = 1;
-                                    datum.illegaltype = result.type;
+                                    datum.illegaltype = result.illegaltype;
                                     datum.isillegal = result.isillegal;
                                     datum.score = result.score;
                                     datum.machineresult = res;
@@ -115,7 +115,7 @@ class atlabHelper {
                             });
                         } else if(index >= data.length) {
                             console.log('current loop index: # ', saveCount);
-                            console.log(concurrenctCount,index,saveCount,data.length);
+                            // console.log(concurrenctCount,index,saveCount,data.length);
                             console.log(`[INFO] |** atlabhelper.censorBatch <${new Date()}> **| While-loop end ...`);
                             break;
                         } else {
@@ -147,7 +147,7 @@ class atlabHelper {
                 filter: {url: datum.url},
                 update: {$set: {
                     status: datum.status,
-                    illegaltype: datum.type,
+                    illegaltype: datum.illegaltype,
                     isillegal: datum.isillegal,
                     score: datum.score,
                     machineresult: datum.machineresult,
@@ -167,21 +167,21 @@ class atlabHelper {
             console.log('data: no data');
             return {
                 isillegal: 0,
-                type: 'unknown file',
+                illegaltype: 'unknown file',
                 score: -1
             }
         } else if (data.error) {
             console.log('data: image size too small < 32x32');
             return {
                 isillegal: 0,
-                type: 'small image file',
+                illegaltype: 'small image file',
                 score: -1
             }
         } else if (data.code == 0) {
             if(data.result.label == 0) {
                 return {
                     isillegal: 0,
-                    type: 'normal',
+                    illegaltype: 'normal',
                     score: data.result.score
                 }
             } else {
@@ -208,14 +208,14 @@ class atlabHelper {
                 
                 return {
                     isillegal: 1,
-                    type: type,
+                    illegaltype: type,
                     score: data.result.score
                 }
             }
         } else {
             return {
                 isillegal: 0,
-                type: 'unknown file',
+                illegaltype: 'unknown file',
                 score: -2
             }
         }
