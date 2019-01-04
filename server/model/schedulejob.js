@@ -6,7 +6,7 @@ const ah = new atlabHelper();
 
 // use UTC time zone
 class scheduleJob {
-    constructor(batchsize = 1000, concurrency = 50, domainJobTriggerTime = 23-8, urlJobTriggerTime = 24-8, aiJobTriggerTime = 25-8) {
+    constructor(batchsize = 1000, concurrency = 50, domainJobTriggerTime = 22, urlJobTriggerTime = 23, aiJobTriggerTime = 0) {
         this.batchsize      = batchsize;
         this.concurrency    = concurrency;
         this.domainJobTriggerTime   = domainJobTriggerTime;
@@ -68,7 +68,7 @@ class scheduleJob {
     }
 
     updateURLTableByAPI() {
-        let endTime = [24+5-8,0,0]; // stop api call before 5 am, use UTC Time zoom 8
+        let endTime = [5,0,0]; // stop api call before 5 am, use UTC Time zoom 8
         let today = new Date();
         let date = [today.getFullYear(), today.getMonth(), today.getDate()];
         if(today.getTime() < new Date(...date, ...endTime).getTime()) {
