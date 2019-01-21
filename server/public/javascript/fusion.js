@@ -1,42 +1,88 @@
 APIHOST = (typeof(APIHOST) == 'undefined') ? '' : APIHOST;
 let DATA = [];
 let USER = {};
+let PAGENUM = 0;
+let PAGESIZE = 30;
+let isScroll = true;
+let SEARCHCONFIG = (typeof(localStorage.config) == 'undefined') ? {
+    startDate: getDateString(new Date()),
+    endDate: getDateString(new Date()),
+    score: 0.8,
+    check1: true,
+    check2: true,
+    check3: true,
+    check4: true,
+} : JSON.parse(localStorage.config);
 
 window.onload = function() {
     setTimeout(init, 1);
 }
 
 function init() {
-    let range = 7;
-    let startDate = new Date();
-    let endDate = getDateString(new Date());
-    startDate = getDateString(new Date(startDate.setDate(startDate.getDate() - range)));
-    document.querySelector('#wa_list_table_datefrom').value = startDate;
-    document.querySelector('#wa_list_table_dateto').value = endDate;
-    getTableList(startDate, endDate);
+    document.querySelector('#wa_list_table_datefrom').value = SEARCHCONFIG.startDate;
+    document.querySelector('#wa_list_table_dateto').value = SEARCHCONFIG.endDate;
+    document.querySelector('#wa_list_table_score').value = SEARCHCONFIG.score;
+    document.querySelector('#wa_list_table_checkbox_1').checked = SEARCHCONFIG.check1;
+    document.querySelector('#wa_list_table_checkbox_2').checked = SEARCHCONFIG.check2;
+    document.querySelector('#wa_list_table_checkbox_3').checked = SEARCHCONFIG.check3;
+    document.querySelector('#wa_list_table_checkbox_4').checked = SEARCHCONFIG.check4;
+    reloadData(false);
 }
 
-function getTableList(startDate, endDate) {
-    // let url = APIHOST + '/getall';
+function reloadData() {
+    DATA = [];
+    PAGENUM = 0;
+    isScroll = true;
+    getTableList(false);
+}
+
+function getTableList(isAppend = false) {
+    let startDate = document.querySelector('#wa_list_table_datefrom').value;
+    let endDate = document.querySelector('#wa_list_table_dateto').value;
+    let score = document.querySelector('#wa_list_table_score').value;
     let url = APIHOST + '/getfusiondata';
     postBody.body = JSON.stringify({
         startDate: startDate,
-        endDate: endDate
+        endDate: endDate,
+        score: score,
+        page: PAGENUM,
+        size: PAGESIZE,
+        status: [
+            document.querySelector('#wa_list_table_checkbox_1').checked,
+            document.querySelector('#wa_list_table_checkbox_2').checked,
+            document.querySelector('#wa_list_table_checkbox_3').checked,
+            document.querySelector('#wa_list_table_checkbox_4').checked
+        ]
     });
     toggleLoadingModal();
     fetch(url, postBody).then(e => e.json()).then(data => {
         if(data.list == undefined) {
-            DATA = data.reverse();
+            DATA = DATA.concat(data);
         } else {
-            DATA = data.list.reverse();
+            DATA = DATA.concat(data.list);
         }
-        USER = data.user;
-        fillListTable(DATA);
-        document.querySelector('#wa_list_result_num span').innerHTML = DATA.length;
+        if(data.length == 0) {
+            isScroll = false;
+        } else {
+            isScroll = true;
+        }
+        
+        
+        fillListTable(document.querySelector('#wa_list_table'), data, isAppend);
+        // document.querySelector('#wa_list_result_num span').innerHTML = DATA.length;
         // genExportTable(DATA);
         toggleLoadingModal();
     });
 }
+
+document.querySelector('section').addEventListener('scroll', function(e) {
+    if(isScroll && e.target.scrollHeight - e.target.scrollTop - e.target.clientHeight < 200) {
+        console.log('loading ...');
+        isScroll = false;
+        PAGENUM++;
+        getTableList(true);
+    }
+});
 
 function getUserInfo(ele, info) {
     let url = APIHOST + '/getbydomain';
@@ -46,49 +92,57 @@ function getUserInfo(ele, info) {
     toggleLoadingModal();
     fetch(url, postBody).then(e => e.json()).then(data => {
         console.log(data);
-        // fillSubTable(ele, data, info);
+        fillSubTable(ele, data.uid, data.data, info);
         toggleLoadingModal();
     });
 }
 
-function fillListTable(data) {
-    let list = `<tr class="wa-list-table-tr-main">
-                    <th>序号</th>
-                    <th>查处日期</th>
-                    <th>文件</th>
-                    <th>文件名</th>
-                    <th>文件类型</th>
-                    <th>涉嫌违规类型</th>
-                    <th>分值</th>
-                    <th>状态</th>
-                </tr>`;
+function fillListTable(ele, data, isAppend=false) {
+    let list = isAppend ? '' : `<tr class="wa-list-table-tr-main">
+                                    <th>序号</th>
+                                    <th>查处日期</th>
+                                    <th>文件</th>
+                                    <th>文件名</th>
+                                    <th>文件类型</th>
+                                    <th>涉嫌违规类型</th>
+                                    <th>分值</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>`;
 
     for(let i in data) {
-        list += `<tr class="wa-list-table-tr-main" onclick="toggleTableRow(event)" data-ind="${i}">
-                    <td>${Number(i)+1}</td>
-                    <td>${new Date(data[i].update_date).toJSON().slice(0,19).replace('T', ' ')}</td>
+        list += `<tr class="wa-list-table-tr-main" onclick="toggleTableRow(event)" data-ind="${PAGENUM*PAGESIZE + Number(i)}">
+                    <td>${PAGENUM*PAGESIZE + Number(i) + 1}</td>
+                    <td>${new Date(data[i].create_date).toJSON().slice(0,19).replace('T', ' ')}</td>
                     <td><a href="${data[i].url}" target="_blank"><img src="${data[i].url}" /></a></td>
                     <td><p>${data[i].url.split('/').slice(-1)[0]}</p></td>
                     <td>${data[i].filetype}</td>
-                    <td>${data[i].illegaltype.map(e=>e.replace('- undefined',''))}</td>
+                    <td>${data[i].illegaltype?data[i].illegaltype.map(e=>e.replace('- undefined','')):''}</td>
                     <td>${data[i].score}</td>
-                    <td>${data[i].status}</td>
+                    <td>${statusTrans(data[i].status)}</td>
+                    <td>
+                        <button class="btn-success" onclick="updateStatus(event,3)">无害</button>
+                        <button class="btn-danger" onclick="updateStatus(event,2)">违规</button>
+                    </td>
                 </tr>
                 <tr class="component-hidden"></tr>`;
     }
-    document.querySelector('#wa_list_table').innerHTML = list;
+    if(isAppend) {
+        ele.innerHTML += list;
+    } else {
+        ele.innerHTML = list;
+    }
 }
 
-function fillSubTable(ele, datum, info) {
+function fillSubTable(ele, uid, datum, info) {
     let temp = '';
     temp = `<td colspan=15 class="wa-list-table-extendpanel">
                 <div>
                     <table class="wa-list-subtable-userinfo">
-                        <tr><th>md5</th><td>${info.md5}</td></tr>
-                        <tr><th>etag</th><td>${info.hash}</td></tr>
+                        <tr><th>uid</th><td>${uid}</td></tr>
+                        <tr><th>域名</th><td>${info.domain}</td></tr>
+                        <tr><th>外链地址</th><td>${info.url}</td></tr>
                         <tr><th>名称</th><td>${datum.DeveloperInfo.fullName}</td></tr>
-                        <tr><th>外链Domain</th><td>${info.domains.join('; \n')}</td></tr>
-                        <tr><th>外链key</th><td>${info.key}</td></tr>
                         <tr><th>联系电话</th><td>${datum.DeveloperInfo.phoneNumber}</td></tr>
                         <tr><th>email</th><td>${datum.DeveloperInfo.email}</td></tr>
                         <tr><th>注册时间</th><td>${(new Date(datum.DeveloperInfo.createAt/1000000)).toJSON().slice(0,-5).replace('T', ' ')}</td></tr>
@@ -219,12 +273,6 @@ function toggleLoadingModal() {
     document.querySelector('.wa-modal-loading').classList.toggle('component-hidden');
 }
 
-function reloadData() {
-    let startDate = document.querySelector('#wa_list_table_datefrom').value;
-    let endDate = document.querySelector('#wa_list_table_dateto').value;
-    getTableList(startDate, endDate);
-}
-
 function isCompany(type, status) {
     if(status == 4 || status == 5) {
         return false;
@@ -235,6 +283,67 @@ function isCompany(type, status) {
     } else {
         return true;
     }
+}
+
+function statusTrans(code) {
+    switch(code) {
+        case 1:
+            return '待审核';
+        case 2:
+            return '已流转';
+        case 3:
+            return '无需处理';
+        case 4:
+            return '已处置';
+        default:
+            return 'err';
+    }
+}
+
+function updateStatus(event, status) {
+    event.stopPropagation();
+    let url = APIHOST + '/updatefusionstatus';
+    postBody.body = JSON.stringify({
+        url: DATA[event.target.closest('tr').dataset.ind].url,
+        status: status
+    });
+    toggleLoadingModal();
+    let ele = event.target.closest('tr').querySelector('td:nth-of-type(8)');
+    fetch(url, postBody).then(e => e.json()).then(res => {
+        console.log(res);
+        if(res.code == 200) {
+            ele.innerHTML = statusTrans(status);
+        }
+        // fillSubTable(ele, data, info);
+        toggleLoadingModal();
+    });
+}
+
+function changeConfig(event, item) {
+    switch(item) {
+        case 'startDate':
+            SEARCHCONFIG[item] = event.target.value;
+            break;
+        case 'endDate':
+            SEARCHCONFIG[item] = event.target.value;
+            break;
+        case 'score':
+            SEARCHCONFIG[item] = event.target.value;
+            break;
+        case 'check1':
+            SEARCHCONFIG[item] = event.target.checked;
+            break;
+        case 'check2':
+            SEARCHCONFIG[item] = event.target.checked;
+            break;
+        case 'check3':
+            SEARCHCONFIG[item] = event.target.checked;
+            break;
+        case 'check4':
+            SEARCHCONFIG[item] = event.target.checked;
+            break;
+    }
+    localStorage.config = JSON.stringify(SEARCHCONFIG);
 }
 
 

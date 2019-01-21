@@ -63,14 +63,16 @@ DBConn.insertData = function(table, data) {
     });
 }
 
-DBConn.queryData = function(table, conditions = {}, size=100, skip=0) {
+DBConn.queryData = function(table, conditions = {}, size=100, skip=0, sort='_id', order=1) {
     return new Promise(function(resolve, reject){
         mongo.connect(CONNECTION, {useNewUrlParser: true}, function(err, db) {
             if (err) reject(err);
             console.log(`|** DBConn.queryData <${table}> **| db connect success ...`);
             let dbase = db.db(DATABASE);
+            let sortquery = {}
+            sortquery[sort] = order
 
-            dbase.collection(table).find(conditions).sort({_id:1}).skip(skip).limit(size).toArray(function(err, res) {
+            dbase.collection(table).find(conditions).sort(sortquery).skip(skip).limit(size).toArray(function(err, res) {
                 if (err) {
                     reject(err);
                 } else {

@@ -4,15 +4,12 @@ let USER = {};
 let PAGENUM = 0;
 let PAGESIZE = 30;
 let isScroll = true;
-let SEARCHCONFIG = (typeof(localStorage.config) == 'undefined') ? {
+let SEARCHCONFIG = (typeof(localStorage.operateconfig) == 'undefined') ? {
     startDate: getDateString(new Date()),
     endDate: getDateString(new Date()),
-    score: 0.8,
-    check1: true,
-    check2: true,
-    check3: true,
-    check4: true,
-} : JSON.parse(localStorage.config);
+    handled: true,
+    unhandle: true
+} : JSON.parse(localStorage.operateconfig);
 
 window.onload = function() {
     setTimeout(init, 1);
@@ -21,11 +18,8 @@ window.onload = function() {
 function init() {
     document.querySelector('#wa_list_table_datefrom').value = SEARCHCONFIG.startDate;
     document.querySelector('#wa_list_table_dateto').value = SEARCHCONFIG.endDate;
-    document.querySelector('#wa_list_table_score').value = SEARCHCONFIG.score;
-    document.querySelector('#wa_list_table_checkbox_1').checked = SEARCHCONFIG.check1;
-    document.querySelector('#wa_list_table_checkbox_2').checked = SEARCHCONFIG.check2;
-    document.querySelector('#wa_list_table_checkbox_3').checked = SEARCHCONFIG.check3;
-    document.querySelector('#wa_list_table_checkbox_4').checked = SEARCHCONFIG.check4;
+    document.querySelector('#wa_list_table_handled').checked = SEARCHCONFIG.handled;
+    document.querySelector('#wa_list_table_unhandle').checked = SEARCHCONFIG.unhandle;
     reloadData(false);
 }
 
@@ -39,19 +33,18 @@ function reloadData() {
 function getTableList(isAppend = false) {
     let startDate = document.querySelector('#wa_list_table_datefrom').value;
     let endDate = document.querySelector('#wa_list_table_dateto').value;
-    let score = document.querySelector('#wa_list_table_score').value;
     let url = APIHOST + '/getfusiondata';
     postBody.body = JSON.stringify({
         startDate: startDate,
         endDate: endDate,
-        score: score,
+        score: 0,
         page: PAGENUM,
         size: PAGESIZE,
         status: [
-            document.querySelector('#wa_list_table_checkbox_1').checked,
-            document.querySelector('#wa_list_table_checkbox_2').checked,
-            document.querySelector('#wa_list_table_checkbox_3').checked,
-            document.querySelector('#wa_list_table_checkbox_4').checked
+            false,
+            document.querySelector('#wa_list_table_unhandle').checked,
+            false,
+            document.querySelector('#wa_list_table_handled').checked
         ]
     });
     toggleLoadingModal();
@@ -121,8 +114,7 @@ function fillListTable(ele, data, isAppend=false) {
                     <td>${data[i].score}</td>
                     <td>${statusTrans(data[i].status)}</td>
                     <td>
-                        <button class="btn-success" onclick="updateStatus(event,3)">无害</button>
-                        <button class="btn-danger" onclick="updateStatus(event,2)">违规</button>
+                        <button class="btn-primary" onclick="updateStatus(event,4)">设为处置</button>
                     </td>
                 </tr>
                 <tr class="component-hidden"></tr>`;
@@ -290,7 +282,7 @@ function statusTrans(code) {
         case 1:
             return '待审核';
         case 2:
-            return '已流转';
+            return '待处置';
         case 3:
             return '无需处理';
         case 4:
@@ -327,23 +319,14 @@ function changeConfig(event, item) {
         case 'endDate':
             SEARCHCONFIG[item] = event.target.value;
             break;
-        case 'score':
-            SEARCHCONFIG[item] = event.target.value;
-            break;
-        case 'check1':
+        case 'handled':
             SEARCHCONFIG[item] = event.target.checked;
             break;
-        case 'check2':
-            SEARCHCONFIG[item] = event.target.checked;
-            break;
-        case 'check3':
-            SEARCHCONFIG[item] = event.target.checked;
-            break;
-        case 'check4':
+        case 'unhandle':
             SEARCHCONFIG[item] = event.target.checked;
             break;
     }
-    localStorage.config = JSON.stringify(SEARCHCONFIG);
+    localStorage.operateconfig = JSON.stringify(SEARCHCONFIG);
 }
 
 

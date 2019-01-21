@@ -23,11 +23,8 @@
             <div>
                 开始日期 <input id="wa_list_table_datefrom" type="date" onchange="changeConfig(event,'startDate')" /> 
                 截止日期 <input id="wa_list_table_dateto" type="date" onchange="changeConfig(event,'endDate')" />
-                置信度 <input id="wa_list_table_score" type="number" step="0.1" min=0 max=1 value=0.7 onchange="changeConfig(event,'score')" />
-                <label for="wa_list_table_checkbox_1"><input id="wa_list_table_checkbox_1" type="checkbox" checked onchange="changeConfig(event,'check1')" />待审核</label>
-                <label for="wa_list_table_checkbox_2"><input id="wa_list_table_checkbox_2" type="checkbox" checked onchange="changeConfig(event,'check2')" />已流转</label>
-                <label for="wa_list_table_checkbox_3"><input id="wa_list_table_checkbox_3" type="checkbox" checked onchange="changeConfig(event,'check3')" />无需处置</label>
-                <label for="wa_list_table_checkbox_4"><input id="wa_list_table_checkbox_4" type="checkbox" checked onchange="changeConfig(event,'check4')" />已处置</label>
+                <label for="wa_list_table_handled"><input id="wa_list_table_handled" type="checkbox" checked onchange="changeConfig(event,'handled')" />已处置</label>
+                <label for="wa_list_table_unhandle"><input id="wa_list_table_unhandle" type="checkbox" checked onchange="changeConfig(event,'unhandle')" />待处置</label>
                 <button id="wa_list_filter_submit" class="btn-primary" onclick="reloadData()">获取数据</button>
             </div>
             <!-- <div>
@@ -38,23 +35,7 @@
         
         <!-- <p id="wa_list_result_num">检索结果，共计：<span></span> 条记录</p> -->
         <div id="wa_list_table_container">
-            <table id="wa_list_table">
-                <tr>
-                    <th>序号</th>
-                    <th>查处日期</th>
-                    <th>md5</th>
-                    <th>etag</th>
-                    <th>文件名</th>
-                    <th>文件类型</th>
-                    <th>违规类型</th>
-                    <th>上传日期</th>
-                    <th>上传IP</th>
-                    <th>端口号</th>
-                    <th>用户名</th>
-                    <th>电话</th>
-                    <th>公司</th>
-                </tr>
-            </table>
+            <table id="wa_list_table"></table>
         </div>
     </section>
 
@@ -68,6 +49,6 @@
 
     <script src="./javascript/config.js"></script>
     <script src="./javascript/filesaver.min.js"></script>
-    <script src="./javascript/fusion.js"></script>
+    <script src="./javascript/operation.js"></script>
 </body>
 </html>

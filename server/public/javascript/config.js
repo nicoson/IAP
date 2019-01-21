@@ -14,9 +14,9 @@ let page = {
     // admin:  '列表管理',
     kodo:   '系统自检',
     fusion: '内部自检',
-    pili:   '直播自检',
-    pool:   '待处理',
-    static: '统计'
+    // pili:   '直播自检',
+    operation:   '违规处置',
+    // static: '统计'
 };
 let navbartmp = '';
 for(let i in page) {

@@ -65,12 +65,20 @@ router.post('/getfusiondata', function(req, res, next) {
   let conditions = {
 		$and: [
 			{isillegal: 1},
-			{update_date: {$gt: new Date(req.body.startDate).getTime()}},
-			{update_date: {$lt: new Date(req.body.endDate).getTime()+86400000}}
+			{create_date: {$gt: new Date(req.body.startDate).getTime()}},
+			{create_date: {$lt: new Date(req.body.endDate).getTime()+86400000}},
+      {'machineresult.result.score': {$gte: parseFloat(req.body.score)}},
+      {$or: []}
 		]
   };
+  for(let i in req.body.status) {
+    if(req.body.status[i]) {
+      conditions['$and'][4]['$or'].push({status: parseInt(i)+1});
+    }
+  }
+
   console.log(JSON.stringify(conditions));
-  apphelper.getIllegalDataFromUrlTable(conditions).then(data => {
+  apphelper.getIllegalDataFromUrlTable(conditions, req.body.size, req.body.page*req.body.size).then(data => {
     res.send(data);
   }).catch(err => res.send(err));
 });
@@ -79,8 +87,23 @@ router.post('/getbydomain', function(req, res, next) {
   apphelper.getUIDbyDomain(req.body.domain).then(uid => {
     console.log('uid: ', uid);
     ahelper.getInfoByUid(uid[0].uid).then(data => {
-      res.send(data);
+      res.send({
+        code: 0,
+        uid: uid[0].uid,
+        data: data
+      });
     }).catch(err => res.send(err));
+  }).catch(err => {
+    res.send({code: 500, err:err});
+  });
+});
+
+router.post('/updatefusionstatus', function(req, res, next) {
+  apphelper.updateURLStatus([req.body]).then(result  => {
+    res.send({
+      code: 200,
+      res: result
+    });
   }).catch(err => {
     res.send({code: 500, err:err});
   });
