@@ -12,7 +12,11 @@ let page = {
     // home:   '综合信息平台',
     // edit:   '编辑列表',
     // admin:  '列表管理',
-    list:   '列表'
+    kodo:   '系统自检',
+    fusion: '内部自检',
+    pili:   '直播自检',
+    pool:   '待处理',
+    static: '统计'
 };
 let navbartmp = '';
 for(let i in page) {

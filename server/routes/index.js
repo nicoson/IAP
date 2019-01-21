@@ -75,6 +75,17 @@ router.post('/getfusiondata', function(req, res, next) {
   }).catch(err => res.send(err));
 });
 
+router.post('/getbydomain', function(req, res, next) {
+  apphelper.getUIDbyDomain(req.body.domain).then(uid => {
+    console.log('uid: ', uid);
+    ahelper.getInfoByUid(uid[0].uid).then(data => {
+      res.send(data);
+    }).catch(err => res.send(err));
+  }).catch(err => {
+    res.send({code: 500, err:err});
+  });
+});
+
 
 /*=====================*\
           Helper

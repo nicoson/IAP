@@ -18,7 +18,7 @@ function init() {
 
 function getTableList(startDate, endDate) {
     // let url = APIHOST + '/getall';
-    let url = APIHOST + '/getfusiondata';
+    let url = APIHOST + '/getalldetail';
     postBody.body = JSON.stringify({
         startDate: startDate,
         endDate: endDate
@@ -33,20 +33,20 @@ function getTableList(startDate, endDate) {
         USER = data.user;
         fillListTable(DATA);
         document.querySelector('#wa_list_result_num span').innerHTML = DATA.length;
-        // genExportTable(DATA);
+        genExportTable(DATA);
         toggleLoadingModal();
     });
 }
 
 function getUserInfo(ele, info) {
-    let url = APIHOST + '/getbydomain';
+    let url = APIHOST + '/getbyuid';
     postBody.body = JSON.stringify({
-        domain: info.domain
+        userinfo: info.owner
     });
     toggleLoadingModal();
     fetch(url, postBody).then(e => e.json()).then(data => {
         console.log(data);
-        // fillSubTable(ele, data, info);
+        fillSubTable(ele, data, info);
         toggleLoadingModal();
     });
 }
@@ -55,26 +55,29 @@ function fillListTable(data) {
     let list = `<tr class="wa-list-table-tr-main">
                     <th>序号</th>
                     <th>查处日期</th>
-                    <th>文件</th>
                     <th>文件名</th>
                     <th>文件类型</th>
                     <th>涉嫌违规类型</th>
-                    <th>分值</th>
-                    <th>状态</th>
+                    <th>上传日期</th>
+                    <th>上传IP</th>
+                    <th>端口号</th>
+                    <th>用户账号</th>
                 </tr>`;
 
     for(let i in data) {
         list += `<tr class="wa-list-table-tr-main" onclick="toggleTableRow(event)" data-ind="${i}">
                     <td>${Number(i)+1}</td>
-                    <td>${new Date(data[i].update_date).toJSON().slice(0,19).replace('T', ' ')}</td>
-                    <td><a href="${data[i].url}" target="_blank"><img src="${data[i].url}" /></a></td>
-                    <td><p>${data[i].url.split('/').slice(-1)[0]}</p></td>
-                    <td>${data[i].filetype}</td>
-                    <td>${data[i].illegaltype.map(e=>e.replace('- undefined',''))}</td>
-                    <td>${data[i].score}</td>
-                    <td>${data[i].status}</td>
+                    <td>${data[i].updated_at.slice(0,19).replace('T', ' ')}</td>
+                    <td><p>${data[i].filename}</p></td>
+                    <td>${data[i].mimeType}</td>
+                    <td>${data[i].type}</td>
+                    <td>${getFullTime(data[i].putTime/10000)}</td>
+                    <td>${data[i].ip.split(':')[0]}</td>
+                    <td>${(data[i].ip.split(':')[1] == undefined) ? '' : data[i].ip.split(':')[1]}</td>
+                    <td>${data[i].owner}</td>
                 </tr>
-                <tr class="component-hidden"></tr>`;
+                <tr class="component-hidden"></tr>
+                `;
     }
     document.querySelector('#wa_list_table').innerHTML = list;
 }
@@ -202,11 +205,6 @@ function getFullTime(time) {
 
 function toggleTableRow(event) {
     // console.log(event);
-    if(event.target.nodeName.toUpperCase() == "IMG") {
-        event.stopPropagation();
-        return;
-    }
-
     let res = event.target.closest('tr').nextElementSibling.classList.toggle('component-hidden');
     // console.log(res)
     if(!res) {

@@ -17,6 +17,12 @@ class appHelper {
         return res;
     }
 
+    async getUIDbyDomain(domain) {
+        console.log('|** appHelper.getUIDbyDomain **| INFO: get data from <domain> table for uid| ', new Date());
+        let res = await DBConn.queryData('domain', {domain:domain}, 1, 0).catch(err => {console.log(err); return []});
+        return res;
+    }
+
 }
 
 module.exports = appHelper;

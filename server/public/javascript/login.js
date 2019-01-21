@@ -1,5 +1,5 @@
 if(sessionStorage.islogin != undefined && sessionStorage.islogin == 'true') {
-    location.href = '/list.html';
+    location.href = '/kodo.html';
 } else {
     // document.querySelector('section').removeAttribute('class');
 }
@@ -14,7 +14,7 @@ document.querySelector('#wa_login_submit').addEventListener('click', function(e)
     let psd = document.querySelector('#wa_login_psd').value.trim()
     if(userlist[user] == psd) {
         sessionStorage.setItem('islogin','true');
-        location.href = '/list.html';
+        location.href = '/kodo.html';
     } else {
         document.querySelector('#wa_login_alert').removeAttribute('class');
     }

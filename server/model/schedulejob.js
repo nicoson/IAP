@@ -12,9 +12,11 @@ class scheduleJob {
         this.domainJobTriggerTime   = domainJobTriggerTime;
         this.urlJobTriggerTime      = urlJobTriggerTime;
         this.aiJobTriggerTime       = aiJobTriggerTime;
-        this.domainjob  = '';
-        this.urljob     = '';
-        this.aijob      = '';
+        this.domainjob      = '';
+        this.urljob         = '';
+        this.aijob          = '';
+        this.updateUIDCount = 0;
+        this.updateURLCount = 0;
     }
 
     initJobs() {
@@ -41,12 +43,15 @@ class scheduleJob {
         // should initialize fusionHelp each time trigger, as status show be changed
         fh.init();
         fh.updateDomain(new Date());
+        this.updateUIDCount = 0;
+        this.updateURLCount = 0;
         this.updateUID();
         this.updateURLTable();
     }
 
     updateUID() {
-        if (fh.status != 1) {
+        if (fh.status != 1 && this.updateUIDCount < 6) {
+            this.updateUIDCount++;
             setTimeout(function(){return this.updateUID();}.bind(this), 300000);
             console.log('|** schecule.updateUID **| INFO: updateDomain not ready, delay 5mins to exec');
         } else {
@@ -56,7 +61,8 @@ class scheduleJob {
     }
 
     updateURLTable() {
-        if (fh.status != 1) {
+        if (fh.status != 1 && this.updateURLCount < 3) {
+            this.updateURLCount++;
             setTimeout(function(){return this.updateURLTable();}.bind(this), 600000);
             console.log('|** schecule.updateURLTable **| INFO: updateDomain not ready, delay 10mins to exec');
         } else {

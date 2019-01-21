@@ -195,7 +195,7 @@ class atlabHelper {
                             break;
                         case 'terror':
                             if(item.label == 1) {
-                                type.push('暴力 - ' + item.class);
+                                type.push('暴力');
                             }
                             break;
                         case 'politician':
