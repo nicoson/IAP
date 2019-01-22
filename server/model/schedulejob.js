@@ -85,8 +85,9 @@ class scheduleJob {
                 }
                 this.updateURLTableByAPI();
             }).catch(err => {
-                console.log('WARNING: err happened, try again later!');
-                this.updateURLTableByAPI();
+                console.log('|** schecule.updateURLTableByAPI **| WARNING: err happened, try again later!');
+                console.log('|** schecule.updateURLTableByAPI **| ERROR: ', JSON.stringify(err));
+                setTimeout(function(){return this.updateURLTableByAPI()}.bind(this), 300000);
             });
         } else {
             console.log('INFO: ', today, ' job stopped as time up!');
