@@ -41,7 +41,10 @@ class atlabHelper {
             if(this.fileType(url) == 'image') {
                 fetch(APIHOST, this.options).then(e => e.json()).then(data => {
                     resolve(data);
-                }).catch(err => reject(err));
+                }).catch(err => {
+                    console.log(`[ERROR] |** atlabhelper.censorCall <${new Date()}> **| CensorCall error msg: ${err}`);
+                    resolve(-1);
+                });
             } else if(this.fileType(url) == 'video') {
                 resolve(-1);
             } else {
