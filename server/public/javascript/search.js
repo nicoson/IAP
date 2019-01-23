@@ -4,16 +4,11 @@ let USER = {};
 let PAGENUM = 0;
 let PAGESIZE = 30;
 let isScroll = true;
-let SEARCHCONFIG = (typeof(localStorage.config) == 'undefined') ? {
+let SEARCHCONFIG = (typeof(localStorage.searchconfig) == 'undefined') ? {
     startDate: getDateString(new Date()),
     endDate: getDateString(new Date()),
     score: 0.8,
-    check1: true,
-    check2: true,
-    check3: true,
-    check4: true,
-    check5: true,
-} : JSON.parse(localStorage.config);
+} : JSON.parse(localStorage.searchconfig);
 
 window.onload = function() {
     setTimeout(init, 1);
@@ -23,12 +18,7 @@ function init() {
     document.querySelector('#wa_list_table_datefrom').value = SEARCHCONFIG.startDate;
     document.querySelector('#wa_list_table_dateto').value = SEARCHCONFIG.endDate;
     document.querySelector('#wa_list_table_score').value = SEARCHCONFIG.score;
-    document.querySelector('#wa_list_table_checkbox_1').checked = SEARCHCONFIG.check1;
-    document.querySelector('#wa_list_table_checkbox_2').checked = SEARCHCONFIG.check2;
-    document.querySelector('#wa_list_table_checkbox_3').checked = SEARCHCONFIG.check3;
-    document.querySelector('#wa_list_table_checkbox_4').checked = SEARCHCONFIG.check4;
-    document.querySelector('#wa_list_table_checkbox_5').checked = SEARCHCONFIG.check5;
-    reloadData(false);
+    // reloadData(false);
 }
 
 function reloadData() {
@@ -42,23 +32,17 @@ function getTableList(isAppend = false) {
     let startDate = document.querySelector('#wa_list_table_datefrom').value;
     let endDate = document.querySelector('#wa_list_table_dateto').value;
     let score = document.querySelector('#wa_list_table_score').value;
-    let url = APIHOST + '/getfusiondata';
+    let domain = document.querySelector('#wa_list_table_domain').value.trim();
+    if(domain.length == 0) return;
+
+    let url = APIHOST + '/getfusiondatabydomain';
     postBody.body = JSON.stringify({
         startDate: startDate,
         endDate: endDate,
         score: score,
-        page: PAGENUM,
-        size: PAGESIZE,
-        status: [
-            document.querySelector('#wa_list_table_checkbox_1').checked,    //  1+5:    待审核 + 驳回
-            document.querySelector('#wa_list_table_checkbox_2').checked,    //  2+8:      单外链违规流转
-            document.querySelector('#wa_list_table_checkbox_3').checked,    //  3:      无需处理
-            document.querySelector('#wa_list_table_checkbox_4').checked,    //  4+6:    单外链 + 域名违规封禁（已处理）
-            document.querySelector('#wa_list_table_checkbox_1').checked,    //  1+5:    待审核 + 驳回
-            document.querySelector('#wa_list_table_checkbox_4').checked,    //  4+6:    单外链 + 域名违规封禁（已处理）
-            document.querySelector('#wa_list_table_checkbox_5').checked,    //  7:      失效
-            document.querySelector('#wa_list_table_checkbox_2').checked     //  2+8:      域名违规流转
-        ]
+        domain: domain,
+        page: 0,
+        size: 9999
     });
     toggleLoadingModal();
     fetch(url, postBody).then(e => e.json()).then(data => {
@@ -75,20 +59,11 @@ function getTableList(isAppend = false) {
         
         
         fillListTable(document.querySelector('#wa_list_table'), data, isAppend);
-        // document.querySelector('#wa_list_result_num span').innerHTML = DATA.length;
+        document.querySelector('#wa_list_result_num span').innerHTML = DATA.length;
         // genExportTable(DATA);
         toggleLoadingModal();
     });
 }
-
-document.querySelector('section').addEventListener('scroll', function(e) {
-    if(isScroll && e.target.scrollHeight - e.target.scrollTop - e.target.clientHeight < 200) {
-        console.log('loading ...');
-        isScroll = false;
-        PAGENUM++;
-        getTableList(true);
-    }
-});
 
 function getUserInfo(ele, info) {
     let url = APIHOST + '/getbydomain';
@@ -114,11 +89,10 @@ function fillListTable(ele, data, isAppend=false) {
                                     <th>涉嫌违规类型</th>
                                     <th>分值</th>
                                     <th>状态</th>
-                                    <th>操作</th>
                                 </tr>`;
 
     for(let i in data) {
-        list += `<tr class="wa-list-table-tr-main" onclick="toggleTableRow(event)" data-ind="${PAGENUM*PAGESIZE + Number(i)}">
+        list += `<tr class="wa-list-table-tr-main" data-ind="${PAGENUM*PAGESIZE + Number(i)}">
                     <td>${PAGENUM*PAGESIZE + Number(i) + 1}</td>
                     <td>${new Date(data[i].create_date).toJSON().slice(0,19).replace('T', ' ')}</td>
                     <td><a href="${data[i].url}" target="_blank"><img class="ja-wa-list-img-placehold" data-src="${data[i].url}" /></a></td>
@@ -128,13 +102,6 @@ function fillListTable(ele, data, isAppend=false) {
                     <td>${data[i].illegaltype?data[i].illegaltype.map(e=>e.replace('- undefined','')):''}</td>
                     <td>${data[i].score}</td>
                     <td class="js-wa-list-status">${statusTrans(data[i].status)}</td>
-                    <td>` +
-                    ((data[i].status == 4 || data[i].status == 6) ? "已处理" :
-                        `<button class="btn-success" onclick="updateStatus(event,3)">无害</button>
-                        <button class="btn-secondary" onclick="updateStatus(event,7)">外链失效</button>
-                        <button class="btn-warning" onclick="updateStatus(event,2)">外链违规</button>
-                        <button class="btn-danger" onclick="setIllegalDomain(event)">域名违规</button>`) +
-                    `</td>
                 </tr>
                 <tr class="component-hidden"></tr>`;
     }
@@ -402,7 +369,7 @@ function changeConfig(event, item) {
             SEARCHCONFIG[item] = event.target.checked;
             break;
     }
-    localStorage.config = JSON.stringify(SEARCHCONFIG);
+    localStorage.searchconfig = JSON.stringify(SEARCHCONFIG);
 }
 
 

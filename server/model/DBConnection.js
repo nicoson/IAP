@@ -10,7 +10,7 @@ function DBConn(){};
     table:   需要创建的表名
     key:     索引字段 unique
 */
-DBConn.createTable = function(table, key) {
+DBConn.createTable = function(table, uniqueKey, key=['create_date']) {
     return new Promise(function(resolve, reject){
         mongo.connect(CONNECTION, {useNewUrlParser: true}, function(err, db) {
             if (err) throw err;
@@ -20,13 +20,19 @@ DBConn.createTable = function(table, key) {
             dbase.createCollection(table, function (err, res) {
                 if (err) reject(err);
                 // console.log(res);
-                console.log(`table ${table} created!`);
+                console.log(`table ${table} creating ...`);
                 let fieldOrSpec = {};
-                fieldOrSpec[key] = 1;
-                dbase.collection(table).createIndex(fieldOrSpec, {unique: true}, function(err,res) {
-                    if (err) reject(err);
-                    db.close();
-                    resolve('done');
+                fieldOrSpec[uniqueKey] = 1;
+                let indexKey = {};
+                key.map(item => {
+                    indexKey[item] = 1;
+                });
+                dbase.collection(table).createIndex(indexKey, {}, function(err,res) {
+                    dbase.collection(table).createIndex(fieldOrSpec, {unique: true}, function(err,res) {
+                        if (err) reject(err);
+                        db.close();
+                        resolve('done');
+                    });
                 });
             });
         });

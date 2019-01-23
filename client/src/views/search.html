@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>违法有害信息上报平台</title>
+    <link rel="stylesheet" href="./stylesheet/common.css">
+    <link rel="stylesheet" href="./stylesheet/layout.css">
+    <link rel="stylesheet" href="./stylesheet/search.css">
+</head>
+<body>
+    <header>
+        <div>
+            <img src="/imgs/qiniulogo.png" alt="">
+            <p>违法有害信息上报平台</p>
+        </div>
+        <div id="navbar"></div>
+    </header>
+
+    <section>
+        <div id="wa_list_filter_bar">
+            <div>
+                检索域名 <input id="wa_list_table_domain" type="text" placeholder="请输入需要检索的域名" />
+                开始日期 <input id="wa_list_table_datefrom" type="date" onchange="changeConfig(event,'startDate')" /> 
+                截止日期 <input id="wa_list_table_dateto" type="date" onchange="changeConfig(event,'endDate')" />
+                置信度 <input id="wa_list_table_score" type="number" step="0.1" min=0 max=1 value=0.7 onchange="changeConfig(event,'score')" />
+                <button id="wa_list_filter_submit" class="btn-primary" onclick="reloadData()">检索</button>
+            </div>
+            <!-- <div>
+                <button id="wa_list_filter_export" class="btn-info" onclick="exportExcel('wa_list_table_export')">导出excel</button>
+                <table id="wa_list_table_export" class="component-hidden"></table>
+            </div> -->
+        </div>
+        
+        <p id="wa_list_result_num">检索结果，共计：<span>0</span> 条记录</p>
+        <div id="wa_list_table_container">
+            <table id="wa_list_table"></table>
+        </div>
+    </section>
+
+    <footer>
+        <p>@copy right reserved by Qiniu</p>
+    </footer>
+
+    <div class="wa-modal-loading component-hidden">
+        <img src="/imgs/loading.png" alt="">
+    </div>
+
+    <script src="./javascript/config.js"></script>
+    <script src="./javascript/filesaver.min.js"></script>
+    <script src="./javascript/search.js"></script>
+</body>
+</html>

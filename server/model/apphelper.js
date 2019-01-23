@@ -10,10 +10,18 @@ class appHelper {
 
     }
 
+    async getUserLogin(username, psd) {
+        console.log('|** appHelper.getUserLogin **| INFO: get data from <user> table for login info| ', new Date());
+        let conditions = {$and:[{username:username},{psd:psd}]};
+        // console.log(JSON.stringify(conditions));
+        let res = await DBConn.queryData('user', conditions, 1, 0).catch(err => {console.log(err); return []});
+        return res;
+    }
+
     // get data from <url> table
     async getIllegalDataFromUrlTable(conditions={}, size=50, skip=0) {
         console.log('|** appHelper.getIllegalDataFromUrlTable **| INFO: get data from <url> table for list view| ', new Date());
-        let res = await DBConn.queryData('url', conditions, size, skip, 'create_date', -1).catch(err => {console.log(err); return []});
+        let res = await DBConn.queryData('url', conditions, size, skip, 'domain', 1).catch(err => {console.log(err); return []});
         return res;
     }
 
@@ -39,6 +47,21 @@ class appHelper {
         return res;
     }
 
+    async updateURLStatusByDomain(data) {
+        console.log('|** appHelper.updateURLStatusByDomain **| INFO: update status for data in <url> table| ', new Date());
+        let operations = data.map(datum => {return {
+            updateMany: {
+                filter: {$and: [{isillegal: 1},{domain: datum.domain}]},
+                update: {$set: {
+                    status: datum.status,
+                    update_date: new Date().getTime()
+                }}
+            }
+        };});
+        console.log(JSON.stringify(operations));
+        let res = await DBConn.updateData('url', operations).catch(err => console.log(`data update failed due to: ${err}`));
+        return res;
+    }
 }
 
 module.exports = appHelper;

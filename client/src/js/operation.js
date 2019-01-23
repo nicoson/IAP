@@ -44,7 +44,11 @@ function getTableList(isAppend = false) {
             false,
             document.querySelector('#wa_list_table_unhandle').checked,
             false,
-            document.querySelector('#wa_list_table_handled').checked
+            document.querySelector('#wa_list_table_handled').checked,
+            false,
+            document.querySelector('#wa_list_table_handled').checked,
+            false,
+            document.querySelector('#wa_list_table_unhandle').checked,
         ]
     });
     toggleLoadingModal();
@@ -95,6 +99,7 @@ function fillListTable(ele, data, isAppend=false) {
                                     <th>序号</th>
                                     <th>查处日期</th>
                                     <th>文件</th>
+                                    <th>域名</th>
                                     <th>文件名</th>
                                     <th>文件类型</th>
                                     <th>涉嫌违规类型</th>
@@ -107,15 +112,21 @@ function fillListTable(ele, data, isAppend=false) {
         list += `<tr class="wa-list-table-tr-main" onclick="toggleTableRow(event)" data-ind="${PAGENUM*PAGESIZE + Number(i)}">
                     <td>${PAGENUM*PAGESIZE + Number(i) + 1}</td>
                     <td>${new Date(data[i].create_date).toJSON().slice(0,19).replace('T', ' ')}</td>
-                    <td><a href="${data[i].url}" target="_blank"><img src="${data[i].url}" /></a></td>
+                    <td><a href="${data[i].url}" target="_blank"><img class="ja-wa-list-img-placehold" data-src="${data[i].url}" /></a></td>
+                    <td><p>${data[i].domain}</p></td>
                     <td><p>${data[i].url.split('/').slice(-1)[0]}</p></td>
                     <td>${data[i].filetype}</td>
                     <td>${data[i].illegaltype?data[i].illegaltype.map(e=>e.replace('- undefined','')):''}</td>
                     <td>${data[i].score}</td>
-                    <td>${statusTrans(data[i].status)}</td>
-                    <td>
-                        <button class="btn-primary" onclick="updateStatus(event,4)">设为处置</button>
-                    </td>
+                    <td class="js-wa-list-status">${statusTrans(data[i].status)}</td>
+                    <td>` + 
+                    ((data[i].status == 2) ? 
+                        `<button class="btn-warning" onclick="updateStatus(event,5)">驳回</button>
+                        <button class="btn-primary" onclick="updateStatus(event,4)">封禁外链</button>` :
+                        ((data[i].status == 8) ?
+                        `<button class="btn-warning" onclick="updateStatusByDomain(event,5)">驳回域名</button>
+                        <button class="btn-danger" onclick="updateStatusByDomain(event,6)">封禁域名</button>` : "已操作")) +
+                    `</td>
                 </tr>
                 <tr class="component-hidden"></tr>`;
     }
@@ -124,6 +135,7 @@ function fillListTable(ele, data, isAppend=false) {
     } else {
         ele.innerHTML = list;
     }
+    loadImg();
 }
 
 function fillSubTable(ele, uid, datum, info) {
@@ -237,6 +249,17 @@ function genExportTable(data) {
     document.querySelector('#wa_list_table_export').innerHTML = temp + '</tbody>';
 }
 
+function loadImg() {
+    let img = document.querySelector('.ja-wa-list-img-placehold');
+    if(img == null) return;
+    img.onload = function() {
+        loadImg();
+    }
+    let src = img.dataset.src;
+    img.classList.toggle('ja-wa-list-img-placehold');
+    img.src = src;
+}
+
 function getDateString(day) {
     return `${day.getFullYear()}-${(day.getMonth()+101).toString().slice(1)}-${(day.getDate()+100).toString().slice(1)}`;
 }
@@ -282,11 +305,19 @@ function statusTrans(code) {
         case 1:
             return '待审核';
         case 2:
-            return '待处置';
+            return '外链违禁流转';
         case 3:
             return '无需处理';
         case 4:
-            return '已处置';
+            return '封禁外链';
+        case 5:
+            return '驳回';
+        case 6:
+            return '封禁域名';
+        case 7:
+            return '已失效';
+        case 8:
+            return '域名违禁流转';
         default:
             return 'err';
     }
@@ -300,7 +331,7 @@ function updateStatus(event, status) {
         status: status
     });
     toggleLoadingModal();
-    let ele = event.target.closest('tr').querySelector('td:nth-of-type(8)');
+    let ele = event.target.closest('tr').querySelector('td.js-wa-list-status');
     fetch(url, postBody).then(e => e.json()).then(res => {
         console.log(res);
         if(res.code == 200) {
@@ -311,6 +342,24 @@ function updateStatus(event, status) {
     });
 }
 
+function updateStatusByDomain(event, status) {
+    event.stopPropagation();
+
+    let url = APIHOST + '/updatefusionstatusbydomain';
+    postBody.body = JSON.stringify({
+        domain: DATA[event.target.closest('tr').dataset.ind].domain,
+        status: status
+    });
+    toggleLoadingModal();
+    fetch(url, postBody).then(e => e.json()).then(res => {
+        console.log(res);
+        if(res.code == 200) {
+            reloadData();
+        }
+        // fillSubTable(ele, data, info);
+        toggleLoadingModal();
+    });
+}
 function changeConfig(event, item) {
     switch(item) {
         case 'startDate':

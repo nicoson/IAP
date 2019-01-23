@@ -12,6 +12,7 @@ let SEARCHCONFIG = (typeof(localStorage.config) == 'undefined') ? {
     check2: true,
     check3: true,
     check4: true,
+    check5: true,
 } : JSON.parse(localStorage.config);
 
 window.onload = function() {
@@ -26,6 +27,7 @@ function init() {
     document.querySelector('#wa_list_table_checkbox_2').checked = SEARCHCONFIG.check2;
     document.querySelector('#wa_list_table_checkbox_3').checked = SEARCHCONFIG.check3;
     document.querySelector('#wa_list_table_checkbox_4').checked = SEARCHCONFIG.check4;
+    document.querySelector('#wa_list_table_checkbox_5').checked = SEARCHCONFIG.check5;
     reloadData(false);
 }
 
@@ -48,10 +50,14 @@ function getTableList(isAppend = false) {
         page: PAGENUM,
         size: PAGESIZE,
         status: [
-            document.querySelector('#wa_list_table_checkbox_1').checked,
-            document.querySelector('#wa_list_table_checkbox_2').checked,
-            document.querySelector('#wa_list_table_checkbox_3').checked,
-            document.querySelector('#wa_list_table_checkbox_4').checked
+            document.querySelector('#wa_list_table_checkbox_1').checked,    //  1+5:    待审核 + 驳回
+            document.querySelector('#wa_list_table_checkbox_2').checked,    //  2+8:      单外链违规流转
+            document.querySelector('#wa_list_table_checkbox_3').checked,    //  3:      无需处理
+            document.querySelector('#wa_list_table_checkbox_4').checked,    //  4+6:    单外链 + 域名违规封禁（已处理）
+            document.querySelector('#wa_list_table_checkbox_1').checked,    //  1+5:    待审核 + 驳回
+            document.querySelector('#wa_list_table_checkbox_4').checked,    //  4+6:    单外链 + 域名违规封禁（已处理）
+            document.querySelector('#wa_list_table_checkbox_5').checked,    //  7:      失效
+            document.querySelector('#wa_list_table_checkbox_2').checked     //  2+8:      域名违规流转
         ]
     });
     toggleLoadingModal();
@@ -102,6 +108,7 @@ function fillListTable(ele, data, isAppend=false) {
                                     <th>序号</th>
                                     <th>查处日期</th>
                                     <th>文件</th>
+                                    <th>域名</th>
                                     <th>文件名</th>
                                     <th>文件类型</th>
                                     <th>涉嫌违规类型</th>
@@ -114,16 +121,20 @@ function fillListTable(ele, data, isAppend=false) {
         list += `<tr class="wa-list-table-tr-main" onclick="toggleTableRow(event)" data-ind="${PAGENUM*PAGESIZE + Number(i)}">
                     <td>${PAGENUM*PAGESIZE + Number(i) + 1}</td>
                     <td>${new Date(data[i].create_date).toJSON().slice(0,19).replace('T', ' ')}</td>
-                    <td><a href="${data[i].url}" target="_blank"><img src="${data[i].url}" /></a></td>
+                    <td><a href="${data[i].url}" target="_blank"><img class="ja-wa-list-img-placehold" data-src="${data[i].url}" /></a></td>
+                    <td><p>${data[i].domain}</p></td>
                     <td><p>${data[i].url.split('/').slice(-1)[0]}</p></td>
                     <td>${data[i].filetype}</td>
                     <td>${data[i].illegaltype?data[i].illegaltype.map(e=>e.replace('- undefined','')):''}</td>
                     <td>${data[i].score}</td>
-                    <td>${statusTrans(data[i].status)}</td>
-                    <td>
-                        <button class="btn-success" onclick="updateStatus(event,3)">无害</button>
-                        <button class="btn-danger" onclick="updateStatus(event,2)">违规</button>
-                    </td>
+                    <td class="js-wa-list-status">${statusTrans(data[i].status)}</td>
+                    <td>` +
+                    ((data[i].status == 4 || data[i].status == 6) ? "已处理" :
+                        `<button class="btn-success" onclick="updateStatus(event,3)">无害</button>
+                        <button class="btn-secondary" onclick="updateStatus(event,7)">外链失效</button>
+                        <button class="btn-warning" onclick="updateStatus(event,2)">外链违规</button>
+                        <button class="btn-danger" onclick="setIllegalDomain(event)">域名违规</button>`) +
+                    `</td>
                 </tr>
                 <tr class="component-hidden"></tr>`;
     }
@@ -132,6 +143,7 @@ function fillListTable(ele, data, isAppend=false) {
     } else {
         ele.innerHTML = list;
     }
+    loadImg();
 }
 
 function fillSubTable(ele, uid, datum, info) {
@@ -245,6 +257,23 @@ function genExportTable(data) {
     document.querySelector('#wa_list_table_export').innerHTML = temp + '</tbody>';
 }
 
+function loadImg() {
+    let img = document.querySelector('.ja-wa-list-img-placehold');
+    if(img == null) return;
+    img.onload = function() {
+        loadImg();
+    }
+    let src = img.dataset.src;
+    img.classList.toggle('ja-wa-list-img-placehold');
+    img.src = src;
+    setTimeout(function(){
+        if(img.clientHeight < 20) {
+            loadImg();
+            console.log('===========> skip bad img resource');
+        }
+    }, 2000);
+}
+
 function getDateString(day) {
     return `${day.getFullYear()}-${(day.getMonth()+101).toString().slice(1)}-${(day.getDate()+100).toString().slice(1)}`;
 }
@@ -290,11 +319,19 @@ function statusTrans(code) {
         case 1:
             return '待审核';
         case 2:
-            return '已流转';
+            return '外链违禁流转';
         case 3:
             return '无需处理';
         case 4:
-            return '已处置';
+            return '封禁外链';
+        case 5:
+            return '驳回';
+        case 6:
+            return '封禁域名';
+        case 7:
+            return '已失效';
+        case 8:
+            return '域名违禁流转';
         default:
             return 'err';
     }
@@ -308,11 +345,30 @@ function updateStatus(event, status) {
         status: status
     });
     toggleLoadingModal();
-    let ele = event.target.closest('tr').querySelector('td:nth-of-type(8)');
+    let ele = event.target.closest('tr').querySelector('td.js-wa-list-status');
     fetch(url, postBody).then(e => e.json()).then(res => {
         console.log(res);
         if(res.code == 200) {
             ele.innerHTML = statusTrans(status);
+        }
+        // fillSubTable(ele, data, info);
+        toggleLoadingModal();
+    });
+}
+
+function setIllegalDomain(event) {
+    event.stopPropagation();
+
+    let url = APIHOST + '/updatefusionstatusbydomain';
+    postBody.body = JSON.stringify({
+        domain: DATA[event.target.closest('tr').dataset.ind].domain,
+        status: 8
+    });
+    toggleLoadingModal();
+    fetch(url, postBody).then(e => e.json()).then(res => {
+        console.log(res);
+        if(res.code == 200) {
+            reloadData();
         }
         // fillSubTable(ele, data, info);
         toggleLoadingModal();
@@ -340,6 +396,9 @@ function changeConfig(event, item) {
             SEARCHCONFIG[item] = event.target.checked;
             break;
         case 'check4':
+            SEARCHCONFIG[item] = event.target.checked;
+            break;
+        case 'check5':
             SEARCHCONFIG[item] = event.target.checked;
             break;
     }
