@@ -156,13 +156,24 @@ class atlabHelper {
                     machineresult: datum.machineresult,
                     filetype: datum.filetype,
                     update_date: datum.update_date
-                }}
+                }},
+                upsert: true
             }
         };});
+
+        let insertion = operations.filter(e => {
+            return e.updateOne.update['$set'].isillegal != 0;
+        });
 
         DBConn.updateData('url', operations).then(e => {
             console.log(`${process}% data has been updated !`);
         }).catch(err => console.log(`data update failed due to: ${err}`));
+
+        if(insertion.length > 0) {
+            DBConn.updateData('illegal', insertion).then(e => {
+                console.log(`${insertion.length} data has been inserted into illegal !`);
+            }).catch(err => console.log(`data update failed due to: ${err}`));
+        }
     }
 
     resHandler(data) {

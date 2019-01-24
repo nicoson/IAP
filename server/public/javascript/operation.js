@@ -82,7 +82,7 @@ document.querySelector('section').addEventListener('scroll', function(e) {
 });
 
 function getUserInfo(ele, info) {
-    let url = APIHOST + '/getbydomain';
+    let url = APIHOST + '/getuserinfobydomain';
     postBody.body = JSON.stringify({
         domain: info.domain
     });

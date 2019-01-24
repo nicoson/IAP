@@ -1,7 +1,8 @@
-const DBConn = require('./DBConnection');
+const DBConn = require('./model/DBConnection');
 
 DBConn.createTable('domain', 'domain').then(e => console.log(e));
 DBConn.createTable('url', 'url').then(e => console.log(e));
+DBConn.createTable('illegal', 'url', ['domain']).then(e => console.log(e));
 DBConn.createTable('user', 'username').then(e => console.log(e));
 
 DBConn.insertData('user', [{

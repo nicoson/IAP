@@ -113,7 +113,7 @@ router.post('/getfusiondatabydomain', function(req, res, next) {
 });
 
 
-router.post('/getbydomain', function(req, res, next) {
+router.post('/getuserinfobydomain', function(req, res, next) {
   apphelper.getUIDbyDomain(req.body.domain).then(uid => {
     console.log('uid: ', uid);
     acsshelper.getInfoByUid(uid[0].uid).then(data => {
@@ -129,7 +129,7 @@ router.post('/getbydomain', function(req, res, next) {
 });
 
 router.post('/updatefusionstatus', function(req, res, next) {
-  apphelper.updateURLStatus([req.body]).then(result  => {
+  apphelper.updateURLStatusByURL([req.body]).then(result  => {
     res.send({
       code: 200,
       res: result

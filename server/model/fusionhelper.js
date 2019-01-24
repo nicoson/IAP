@@ -12,8 +12,6 @@ const FUSIONDOMAIN = CONFIG.FUSIONDOMAIN;   // get uid by domain
 class fusionHelper {
     constructor() {
         this.init();
-        DBConn.createTable('domain', 'domain').then(e => console.log(e));
-        DBConn.createTable('url', 'url').then(e => console.log(e));
     }
 
     init() {

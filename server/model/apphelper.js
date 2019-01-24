@@ -21,7 +21,7 @@ class appHelper {
     // get data from <url> table
     async getIllegalDataFromUrlTable(conditions={}, size=50, skip=0) {
         console.log('|** appHelper.getIllegalDataFromUrlTable **| INFO: get data from <url> table for list view| ', new Date());
-        let res = await DBConn.queryData('url', conditions, size, skip, 'domain', 1).catch(err => {console.log(err); return []});
+        let res = await DBConn.queryData('illegal', conditions, size, skip, 'domain', 1).catch(err => {console.log(err); return []});
         return res;
     }
 
@@ -31,7 +31,7 @@ class appHelper {
         return res;
     }
 
-    async updateURLStatus(data) {
+    async updateURLStatusByURL(data) {
         console.log('|** appHelper.updateURLStatus **| INFO: update status for data in <url> table| ', new Date());
         let operations = data.map(datum => {return {
             updateOne: {
@@ -43,7 +43,7 @@ class appHelper {
             }
         };});
         console.log(JSON.stringify(operations));
-        let res = await DBConn.updateData('url', operations).catch(err => console.log(`data update failed due to: ${err}`));
+        let res = await DBConn.updateData('illegal', operations).catch(err => console.log(`data update failed due to: ${err}`));
         return res;
     }
 
@@ -59,7 +59,7 @@ class appHelper {
             }
         };});
         console.log(JSON.stringify(operations));
-        let res = await DBConn.updateData('url', operations).catch(err => console.log(`data update failed due to: ${err}`));
+        let res = await DBConn.updateData('illegal', operations).catch(err => console.log(`data update failed due to: ${err}`));
         return res;
     }
 }
