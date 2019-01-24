@@ -20,6 +20,9 @@ function init() {
     document.querySelector('#wa_list_table_dateto').value = SEARCHCONFIG.endDate;
     document.querySelector('#wa_list_table_handled').checked = SEARCHCONFIG.handled;
     document.querySelector('#wa_list_table_unhandle').checked = SEARCHCONFIG.unhandle;
+    document.querySelector('#wa_list_table_checkbox_pulp').checked = SEARCHCONFIG.pulp;
+    document.querySelector('#wa_list_table_checkbox_terror').checked = SEARCHCONFIG.terror;
+    document.querySelector('#wa_list_table_checkbox_politician').checked = SEARCHCONFIG.politician;
     reloadData(false);
 }
 
@@ -40,6 +43,9 @@ function getTableList(isAppend = false) {
         score: 0,
         page: PAGENUM,
         size: PAGESIZE,
+        pulp: document.querySelector('#wa_list_table_checkbox_pulp').checked,
+        terror: document.querySelector('#wa_list_table_checkbox_terror').checked,
+        politician: document.querySelector('#wa_list_table_checkbox_politician').checked,
         status: [
             false,
             document.querySelector('#wa_list_table_unhandle').checked,
@@ -372,6 +378,15 @@ function changeConfig(event, item) {
             SEARCHCONFIG[item] = event.target.checked;
             break;
         case 'unhandle':
+            SEARCHCONFIG[item] = event.target.checked;
+            break;
+        case 'pulp':
+            SEARCHCONFIG[item] = event.target.checked;
+            break;
+        case 'terror':
+            SEARCHCONFIG[item] = event.target.checked;
+            break;
+        case 'politician':
             SEARCHCONFIG[item] = event.target.checked;
             break;
     }

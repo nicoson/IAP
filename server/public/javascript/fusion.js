@@ -28,6 +28,9 @@ function init() {
     document.querySelector('#wa_list_table_checkbox_3').checked = SEARCHCONFIG.check3;
     document.querySelector('#wa_list_table_checkbox_4').checked = SEARCHCONFIG.check4;
     document.querySelector('#wa_list_table_checkbox_5').checked = SEARCHCONFIG.check5;
+    document.querySelector('#wa_list_table_checkbox_pulp').checked = SEARCHCONFIG.pulp;
+    document.querySelector('#wa_list_table_checkbox_terror').checked = SEARCHCONFIG.terror;
+    document.querySelector('#wa_list_table_checkbox_politician').checked = SEARCHCONFIG.politician;
     reloadData(false);
 }
 
@@ -49,6 +52,9 @@ function getTableList(isAppend = false) {
         score: score,
         page: PAGENUM,
         size: PAGESIZE,
+        pulp: document.querySelector('#wa_list_table_checkbox_pulp').checked,
+        terror: document.querySelector('#wa_list_table_checkbox_terror').checked,
+        politician: document.querySelector('#wa_list_table_checkbox_politician').checked,
         status: [
             document.querySelector('#wa_list_table_checkbox_1').checked,    //  1+5:    待审核 + 驳回
             document.querySelector('#wa_list_table_checkbox_2').checked,    //  2+8:      单外链违规流转
@@ -399,6 +405,15 @@ function changeConfig(event, item) {
             SEARCHCONFIG[item] = event.target.checked;
             break;
         case 'check5':
+            SEARCHCONFIG[item] = event.target.checked;
+            break;
+        case 'pulp':
+            SEARCHCONFIG[item] = event.target.checked;
+            break;
+        case 'terror':
+            SEARCHCONFIG[item] = event.target.checked;
+            break;
+        case 'politician':
             SEARCHCONFIG[item] = event.target.checked;
             break;
     }

@@ -25,6 +25,9 @@
                 截止日期 <input id="wa_list_table_dateto" type="date" onchange="changeConfig(event,'endDate')" />
                 <label for="wa_list_table_handled"><input id="wa_list_table_handled" type="checkbox" checked onchange="changeConfig(event,'handled')" />已处置</label>
                 <label for="wa_list_table_unhandle"><input id="wa_list_table_unhandle" type="checkbox" checked onchange="changeConfig(event,'unhandle')" />待处置</label>
+                <label for="wa_list_table_checkbox_pulp"><input id="wa_list_table_checkbox_pulp" type="checkbox" checked onchange="changeConfig(event,'pulp')" />涉黄</label>
+                <label for="wa_list_table_checkbox_terror"><input id="wa_list_table_checkbox_terror" type="checkbox" checked onchange="changeConfig(event,'terror')" />涉暴</label>
+                <label for="wa_list_table_checkbox_politician"><input id="wa_list_table_checkbox_politician" type="checkbox" checked onchange="changeConfig(event,'politician')" />涉政</label>
                 <button id="wa_list_filter_submit" class="btn-primary" onclick="reloadData()">获取数据</button>
             </div>
             <!-- <div>

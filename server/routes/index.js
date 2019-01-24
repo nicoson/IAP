@@ -87,6 +87,18 @@ router.post('/getfusiondata', function(req, res, next) {
       conditions['$and'][4]['$or'].push({status: parseInt(i)+1});
     }
   }
+  if(!req.body.pulp || !req.body.terror || !req.body.politician) {
+    conditions['$and'].push({$or:[]});
+    if(req.body.pulp) {
+      conditions['$and'][5]['$or'].push({illegaltype: /色情/g});
+    }
+    if(req.body.terror) {
+      conditions['$and'][5]['$or'].push({illegaltype: /暴力/g});
+    }
+    if(req.body.politician) {
+      conditions['$and'][5]['$or'].push({illegaltype: /敏感人物/g});
+    }
+  }
 
   console.log(JSON.stringify(conditions));
   apphelper.getIllegalDataFromUrlTable(conditions, req.body.size, req.body.page*req.body.size).then(data => {
