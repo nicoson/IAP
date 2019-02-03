@@ -60,19 +60,19 @@ function getTableList(isAppend = false) {
     toggleLoadingModal();
     fetch(url, postBody).then(e => e.json()).then(data => {
         if(data.list == undefined) {
-            DATA = DATA.concat(data);
+            DATA = DATA.concat(data.data);
         } else {
             DATA = DATA.concat(data.list);
         }
-        if(data.length == 0) {
+        if(data.data.length == 0) {
             isScroll = false;
         } else {
             isScroll = true;
         }
         
         
-        fillListTable(document.querySelector('#wa_list_table'), data, isAppend);
-        // document.querySelector('#wa_list_result_num span').innerHTML = DATA.length;
+        fillListTable(document.querySelector('#wa_list_table'), data.data, isAppend);
+        document.querySelector('#wa_list_result_num span').innerHTML = data.count;
         // genExportTable(DATA);
         toggleLoadingModal();
     });

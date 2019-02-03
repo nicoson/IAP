@@ -52,7 +52,7 @@ DBConn.insertData = function(table, data) {
 
             dbase.collection(table).insertMany(data, {ordered: false}, function(err, res) {
                 if (err) {
-                    console.log("|** DBConn.insertData <${table}> **| error: ", err);
+                    console.log(`|** DBConn.insertData <${table}> **| error: `, err);
                     if(err.result == undefined || err.result.result == undefined || err.result.result.ok != 1) {
                         reject(err);
                     } else {

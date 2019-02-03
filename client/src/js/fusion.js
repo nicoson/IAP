@@ -69,19 +69,19 @@ function getTableList(isAppend = false) {
     toggleLoadingModal();
     fetch(url, postBody).then(e => e.json()).then(data => {
         if(data.list == undefined) {
-            DATA = DATA.concat(data);
+            DATA = DATA.concat(data.data);
         } else {
             DATA = DATA.concat(data.list);
         }
-        if(data.length == 0) {
+        if(data.data.length == 0) {
             isScroll = false;
         } else {
             isScroll = true;
         }
         
         
-        fillListTable(document.querySelector('#wa_list_table'), data, isAppend);
-        // document.querySelector('#wa_list_result_num span').innerHTML = DATA.length;
+        fillListTable(document.querySelector('#wa_list_table'), data.data, isAppend);
+        document.querySelector('#wa_list_result_num span').innerHTML = data.count;
         // genExportTable(DATA);
         toggleLoadingModal();
     });
@@ -114,7 +114,7 @@ function fillListTable(ele, data, isAppend=false) {
                                     <th>序号</th>
                                     <th>查处日期</th>
                                     <th>文件</th>
-                                    <th>域名</th>
+                                    <th>域名（点击展开详情）</th>
                                     <th>文件名</th>
                                     <th>文件类型</th>
                                     <th>涉嫌违规类型</th>
@@ -124,11 +124,11 @@ function fillListTable(ele, data, isAppend=false) {
                                 </tr>`;
 
     for(let i in data) {
-        list += `<tr class="wa-list-table-tr-main" onclick="toggleTableRow(event)" data-ind="${PAGENUM*PAGESIZE + Number(i)}">
+        list += `<tr class="wa-list-table-tr-main" data-ind="${PAGENUM*PAGESIZE + Number(i)}">
                     <td>${PAGENUM*PAGESIZE + Number(i) + 1}</td>
-                    <td>${new Date(data[i].create_date).toJSON().slice(0,19).replace('T', ' ')}</td>
+                    <td>${new Date(data[i].create_date).toJSON().slice(0,19).replace('T', '<br />')}</td>
                     <td><a href="${data[i].url}" target="_blank"><img class="ja-wa-list-img-placehold" data-src="${data[i].url}" /></a></td>
-                    <td><p>${data[i].domain}</p></td>
+                    <td onclick="toggleTableRow(event)"><p>${data[i].domain}</p></td>
                     <td><p>${data[i].url.split('/').slice(-1)[0]}</p></td>
                     <td>${data[i].filetype}</td>
                     <td>${data[i].illegaltype?data[i].illegaltype.map(e=>e.replace('- undefined','')):''}</td>

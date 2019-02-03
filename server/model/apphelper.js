@@ -22,7 +22,12 @@ class appHelper {
     async getIllegalDataFromUrlTable(conditions={}, size=50, skip=0) {
         console.log('|** appHelper.getIllegalDataFromUrlTable **| INFO: get data from <url> table for list view| ', new Date());
         let res = await DBConn.queryData('illegal', conditions, size, skip, 'domain', 1).catch(err => {console.log(err); return []});
-        return res;
+        let count = await DBConn.count('illegal', conditions).catch(err => {console.log(err); return []});
+        console.log('count: ',count);
+        return {
+            data: res,
+            count: count
+        };
     }
 
     async getUIDbyDomain(domain) {

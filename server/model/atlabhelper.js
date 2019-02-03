@@ -148,15 +148,7 @@ class atlabHelper {
         let operations = data.map(datum => {return {
             updateOne: {
                 filter: {url: datum.url},
-                update: {$set: {
-                    status: datum.status,
-                    illegaltype: datum.illegaltype,
-                    isillegal: datum.isillegal,
-                    score: datum.score,
-                    machineresult: datum.machineresult,
-                    filetype: datum.filetype,
-                    update_date: datum.update_date
-                }},
+                update: {$set: datum},
                 upsert: true
             }
         };});
