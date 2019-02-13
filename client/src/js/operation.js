@@ -37,6 +37,13 @@ function getTableList(isAppend = false) {
     let startDate = document.querySelector('#wa_list_table_datefrom').value;
     let endDate = document.querySelector('#wa_list_table_dateto').value;
     let url = APIHOST + '/getfusiondata';
+    let status = [];
+    if(document.querySelector('#wa_list_table_handled').checked) {
+        status.push(4,6);   //  4+6:    单链、域名处置
+    }
+    if(document.querySelector('#wa_list_table_unhandle').checked) {
+        status.push(2,8);   //  2+8:    单链、域名流转
+    }
     postBody.body = JSON.stringify({
         startDate: startDate,
         endDate: endDate,
@@ -46,16 +53,7 @@ function getTableList(isAppend = false) {
         pulp: document.querySelector('#wa_list_table_checkbox_pulp').checked,
         terror: document.querySelector('#wa_list_table_checkbox_terror').checked,
         politician: document.querySelector('#wa_list_table_checkbox_politician').checked,
-        status: [
-            false,
-            document.querySelector('#wa_list_table_unhandle').checked,
-            false,
-            document.querySelector('#wa_list_table_handled').checked,
-            false,
-            document.querySelector('#wa_list_table_handled').checked,
-            false,
-            document.querySelector('#wa_list_table_unhandle').checked,
-        ]
+        status: status
     });
     toggleLoadingModal();
     fetch(url, postBody).then(e => e.json()).then(data => {
@@ -116,22 +114,22 @@ function fillListTable(ele, data, isAppend=false) {
 
     for(let i in data) {
         list += `<tr class="wa-list-table-tr-main" data-ind="${PAGENUM*PAGESIZE + Number(i)}">
-                    <td><input type="checkbox" data-url="${data[i].url}" />&nbsp;${PAGENUM*PAGESIZE + Number(i) + 1}</td>
+                    <td><input type="checkbox" class="js-wa-operation-checkbox" data-url="${data[i].url}" />&nbsp;${PAGENUM*PAGESIZE + Number(i) + 1}</td>
                     <td>${new Date(data[i].create_date).toJSON().slice(0,19).replace('T', '<br />')}</td>
                     <td><a href="${data[i].url}" target="_blank">${data[i].url}</td>
                     <td onclick="toggleTableRow(event)"><p>${data[i].domain}</p></td>
-                    <td><p>${data[i].url.split('/').slice(-1)[0]}</p></td>
+                    <td><p>${decodeURI(data[i].url.split('/').slice(-1)[0])}</p></td>
                     <td>${data[i].filetype}</td>
                     <td>${data[i].illegaltype?data[i].illegaltype.map(e=>e.replace('- undefined','')):''}</td>
                     <td>${data[i].score}</td>
                     <td class="js-wa-list-status">${statusTrans(data[i].status)}</td>
                     <td>` + 
                     ((data[i].status == 2) ? 
-                        `<button class="btn-warning" onclick="updateStatus(event,5)">驳回</button>
+                        `<button class="btn-warning" onclick="updateStatus(event,5)">驳回外链</button>
                         <button class="btn-primary" onclick="updateStatus(event,4)">封禁外链</button>` :
                         ((data[i].status == 8) ?
-                        `<button class="btn-warning" onclick="updateStatusByDomain(event,5)">驳回域名</button>
-                        <button class="btn-danger" onclick="updateStatusByDomain(event,6)">封禁域名</button>` : "已操作")) +
+                        `<button class="btn-warning" onclick="updateStatusByDomain(event,5,5)">驳回域名</button>
+                        <button class="btn-danger" onclick="updateStatusByDomain(event,6,10)">封禁域名</button>` : "已操作")) +
                     `</td>
                 </tr>
                 <tr class="component-hidden"></tr>`;
@@ -348,13 +346,15 @@ function updateStatus(event, status) {
     });
 }
 
-function updateStatusByDomain(event, status) {
+function updateStatusByDomain(event, urlstatus, domainstatus) {
     event.stopPropagation();
 
     let url = APIHOST + '/updatefusionstatusbydomain';
     postBody.body = JSON.stringify({
+        url: DATA[event.target.closest('tr').dataset.ind].url,
         domain: DATA[event.target.closest('tr').dataset.ind].domain,
-        status: status
+        urlstatus: urlstatus,
+        domainstatus: domainstatus
     });
     toggleLoadingModal();
     fetch(url, postBody).then(e => e.json()).then(res => {
@@ -393,6 +393,18 @@ function changeConfig(event, item) {
     localStorage.operateconfig = JSON.stringify(SEARCHCONFIG);
 }
 
+function getLinks(event) {
+    let elem = document.querySelectorAll('.js-wa-operation-checkbox:checked');
+    let list = [];
+    elem.forEach(ele => {
+        list.push(ele.dataset['url']);
+    });
+    let textnode = document.querySelector('#wa_list_operation_bar input');
+    textnode.value = list.join(';');
+    textnode.select();
+    document.execCommand('copy');
+    alert('链接已经复制到粘贴板！');
+}
 
 /*==========================================*\
    excel export component: use filesaver.js

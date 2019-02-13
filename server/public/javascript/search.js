@@ -58,8 +58,8 @@ function getTableList(isAppend = false) {
         }
         
         
-        fillListTable(document.querySelector('#wa_list_table'), data, isAppend);
-        document.querySelector('#wa_list_result_num span').innerHTML = DATA.length;
+        fillListTable(document.querySelector('#wa_list_table'), data.data, isAppend);
+        document.querySelector('#wa_list_result_num span').innerHTML = data.count;
         // genExportTable(DATA);
         toggleLoadingModal();
     });

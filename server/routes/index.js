@@ -82,11 +82,9 @@ router.post('/getfusiondata', function(req, res, next) {
       {$or: []}
 		]
   };
-  for(let i in req.body.status) {
-    if(req.body.status[i]) {
-      conditions['$and'][4]['$or'].push({status: parseInt(i)+1});
-    }
-  }
+  req.body.status.map(status => {
+    conditions['$and'][4]['$or'].push({status: status});
+  });
   if(!req.body.pulp || !req.body.terror || !req.body.politician) {
     conditions['$and'].push({$or:[]});
     if(req.body.pulp) {
@@ -152,10 +150,20 @@ router.post('/updatefusionstatus', function(req, res, next) {
 });
 
 router.post('/updatefusionstatusbydomain', function(req, res, next) {
-  apphelper.updateURLStatusByDomain([req.body]).then(result  => {
-    res.send({
-      code: 200,
-      res: result
+  apphelper.updateURLStatusByDomain([{
+    domain: req.body.domain,
+    status: req.body.domainstatus
+  }]).then(()  => {
+    apphelper.updateURLStatusByURL([{
+      url: req.body.url,
+      status: req.body.urlstatus
+    }]).then(result  => {
+      res.send({
+        code: 200,
+        res: result
+      });
+    }).catch(err => {
+      res.send({code: 500, err:err});
     });
   }).catch(err => {
     res.send({code: 500, err:err});

@@ -25,12 +25,14 @@ function getTableList(startDate, endDate) {
     });
     toggleLoadingModal();
     fetch(url, postBody).then(e => e.json()).then(data => {
-        if(data.list == undefined) {
-            DATA = data.reverse();
+        if(typeof(data.list) == 'undefined') {
+            DATA = [];
+            USER = {};
+            alert('系统忙，请稍后再试 ... ...');
         } else {
             DATA = data.list.reverse();
+            USER = data.user;
         }
-        USER = data.user;
         fillListTable(DATA);
         document.querySelector('#wa_list_result_num span').innerHTML = DATA.length;
         genExportTable(DATA);

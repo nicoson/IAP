@@ -6,12 +6,17 @@ section > div {
   padding: 0 0 2rem 0;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 #wa_list_filter_bar input {
   padding: .5rem;
   margin: 0 1rem;
   border-radius: 5px;
   border: 1px solid #aaa;
+}
+#wa_list_filter_bar > button {
+  margin-left: 1rem;
+  height: min-content;
 }
 #wa_list_result_num {
   margin: 1rem;
@@ -26,11 +31,12 @@ table#wa_list_table {
 }
 table#wa_list_table td,
 table#wa_list_table th {
-  width: 5%;
+  width: 10%;
   padding: .5rem;
   border: 1px solid #00a7de56;
   text-align: center;
   word-wrap: break-word;
+  word-break: break-all;
 }
 table#wa_list_table td img,
 table#wa_list_table th img {
@@ -41,6 +47,10 @@ table#wa_list_table tr {
 }
 table#wa_list_table td {
   color: #666;
+}
+table#wa_list_table td:nth-of-type(4):hover {
+  outline: 3px solid #f3f17ff8;
+  cursor: pointer;
 }
 table#wa_list_table tr.wa-list-table-tr-main td {
   background: #00a7de0f;
@@ -248,4 +258,17 @@ table#wa_list_table .wa-list-table-extendpanel div table th {
   max-height: 80vh;
   width: 80vw;
   padding: 2rem;
+}
+#wa_list_operation_bar {
+  display: flex;
+  justify-content: space-between;
+  padding: .5rem;
+}
+#wa_list_operation_bar input {
+  border: none;
+  color: white;
+  width: 1px;
+}
+#wa_list_operation_bar button {
+  height: min-content;
 }

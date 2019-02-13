@@ -36,7 +36,12 @@
             </div> -->
         </div>
         
-        <p id="wa_list_result_num">检索结果，共计：<span></span> 条记录</p>
+        <div id="wa_list_operation_bar">
+            <p id="wa_list_result_num">检索结果，共计：<span></span> 条记录</p>
+            <input type="text" />
+            <button class="btn-info" onclick="getLinks(event)">复制选中链接</button>
+        </div>
+
         <div id="wa_list_table_container">
             <table id="wa_list_table"></table>
         </div>

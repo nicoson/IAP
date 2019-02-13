@@ -46,6 +46,22 @@ function getTableList(isAppend = false) {
     let endDate = document.querySelector('#wa_list_table_dateto').value;
     let score = document.querySelector('#wa_list_table_score').value;
     let url = APIHOST + '/getfusiondata';
+    let status = [];
+    if(document.querySelector('#wa_list_table_checkbox_1').checked) {
+        status.push(1,5);   //  1+5:    待审核 + 驳回
+    }
+    if(document.querySelector('#wa_list_table_checkbox_2').checked) {
+        status.push(2,8);   //  2+8:    单外链违规流转
+    }
+    if(document.querySelector('#wa_list_table_checkbox_3').checked) {
+        status.push(3);     //  3:      无需处理
+    }
+    if(document.querySelector('#wa_list_table_checkbox_4').checked) {
+        status.push(4,6);   //  4+6:    单外链 + 域名违规封禁（已处理）
+    }
+    if(document.querySelector('#wa_list_table_checkbox_5').checked) {
+        status.push(7);     //  7:      失效
+    }
     postBody.body = JSON.stringify({
         startDate: startDate,
         endDate: endDate,
@@ -55,16 +71,7 @@ function getTableList(isAppend = false) {
         pulp: document.querySelector('#wa_list_table_checkbox_pulp').checked,
         terror: document.querySelector('#wa_list_table_checkbox_terror').checked,
         politician: document.querySelector('#wa_list_table_checkbox_politician').checked,
-        status: [
-            document.querySelector('#wa_list_table_checkbox_1').checked,    //  1+5:    待审核 + 驳回
-            document.querySelector('#wa_list_table_checkbox_2').checked,    //  2+8:      单外链违规流转
-            document.querySelector('#wa_list_table_checkbox_3').checked,    //  3:      无需处理
-            document.querySelector('#wa_list_table_checkbox_4').checked,    //  4+6:    单外链 + 域名违规封禁（已处理）
-            document.querySelector('#wa_list_table_checkbox_1').checked,    //  1+5:    待审核 + 驳回
-            document.querySelector('#wa_list_table_checkbox_4').checked,    //  4+6:    单外链 + 域名违规封禁（已处理）
-            document.querySelector('#wa_list_table_checkbox_5').checked,    //  7:      失效
-            document.querySelector('#wa_list_table_checkbox_2').checked     //  2+8:      域名违规流转
-        ]
+        status: status
     });
     toggleLoadingModal();
     fetch(url, postBody).then(e => e.json()).then(data => {
@@ -114,7 +121,7 @@ function fillListTable(ele, data, isAppend=false) {
                                     <th>序号</th>
                                     <th>查处日期</th>
                                     <th>文件</th>
-                                    <th>域名</th>
+                                    <th>域名（点击展开详情）</th>
                                     <th>文件名</th>
                                     <th>文件类型</th>
                                     <th>涉嫌违规类型</th>
@@ -124,18 +131,18 @@ function fillListTable(ele, data, isAppend=false) {
                                 </tr>`;
 
     for(let i in data) {
-        list += `<tr class="wa-list-table-tr-main" onclick="toggleTableRow(event)" data-ind="${PAGENUM*PAGESIZE + Number(i)}">
+        list += `<tr class="wa-list-table-tr-main" data-ind="${PAGENUM*PAGESIZE + Number(i)}">
                     <td>${PAGENUM*PAGESIZE + Number(i) + 1}</td>
-                    <td>${new Date(data[i].create_date).toJSON().slice(0,19).replace('T', ' ')}</td>
+                    <td>${new Date(data[i].create_date).toJSON().slice(0,19).replace('T', '<br />')}</td>
                     <td><a href="${data[i].url}" target="_blank"><img class="ja-wa-list-img-placehold" data-src="${data[i].url}" /></a></td>
-                    <td><p>${data[i].domain}</p></td>
-                    <td><p>${data[i].url.split('/').slice(-1)[0]}</p></td>
+                    <td onclick="toggleTableRow(event)"><p>${data[i].domain}</p></td>
+                    <td><p>${decodeURI(data[i].url.split('/').slice(-1)[0])}</p></td>
                     <td>${data[i].filetype}</td>
                     <td>${data[i].illegaltype?data[i].illegaltype.map(e=>e.replace('- undefined','')):''}</td>
                     <td>${data[i].score}</td>
                     <td class="js-wa-list-status">${statusTrans(data[i].status)}</td>
                     <td>` +
-                    ((data[i].status == 4 || data[i].status == 6) ? "已处理" :
+                        ((data[i].status == 4 || data[i].status == 6) ? "已处理" :
                         `<button class="btn-success" onclick="updateStatus(event,3)">无害</button>
                         <button class="btn-secondary" onclick="updateStatus(event,7)">外链失效</button>
                         <button class="btn-warning" onclick="updateStatus(event,2)">外链违规</button>
@@ -367,8 +374,10 @@ function setIllegalDomain(event) {
 
     let url = APIHOST + '/updatefusionstatusbydomain';
     postBody.body = JSON.stringify({
+        url: DATA[event.target.closest('tr').dataset.ind].url,
         domain: DATA[event.target.closest('tr').dataset.ind].domain,
-        status: 8
+        urlstatus: 8,
+        domainstatus: 9
     });
     toggleLoadingModal();
     fetch(url, postBody).then(e => e.json()).then(res => {
