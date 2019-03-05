@@ -1,13 +1,13 @@
 // const fs        = require('fs');
 const express     = require('express');
 const acssHelper  = require('../model/acsshelper');
-const appHelper  = require('../model/apphelper');
+const appHelper   = require('../model/apphelper');
 const jobHelper   = require('../model/schedulejob');
 const router      = express.Router();
 
-let acsshelper = new acssHelper();
-let apphelper = new appHelper();
-let sjob    = new jobHelper();
+let acsshelper  = new acssHelper();
+let apphelper   = new appHelper();
+let sjob        = new jobHelper();
 sjob.initJobs();  // start schedule jobs
 
 /* GET login page. */
@@ -76,30 +76,45 @@ router.post('/getfusiondata', function(req, res, next) {
   let conditions = {
 		$and: [
 			{isillegal: 1},
+      {isshow: {$ne: false}},
 			{create_date: {$gt: new Date(req.body.startDate).getTime()}},
 			{create_date: {$lt: new Date(req.body.endDate).getTime()+86400000}},
-      {'machineresult.result.score': {$gte: parseFloat(req.body.score)}},
-      {$or: []}
+      {score: {$gte: parseFloat(req.body.score)}}
 		]
   };
-  req.body.status.map(status => {
-    conditions['$and'][4]['$or'].push({status: status});
-  });
-  if(!req.body.pulp || !req.body.terror || !req.body.politician) {
-    conditions['$and'].push({$or:[]});
-    if(req.body.pulp) {
-      conditions['$and'][5]['$or'].push({illegaltype: /色情/g});
-    }
-    if(req.body.terror) {
-      conditions['$and'][5]['$or'].push({illegaltype: /暴力/g});
-    }
-    if(req.body.politician) {
-      conditions['$and'][5]['$or'].push({illegaltype: /敏感人物/g});
+
+  {
+    if(req.body.filetype != 'both') {
+      conditions['$and'].push({filetype: req.body.filetype});
     }
   }
 
-  console.log(JSON.stringify(conditions));
-  apphelper.getIllegalDataFromUrlTable(conditions, req.body.size, req.body.page*req.body.size).then(data => {
+  {
+    let statusCondition = [];
+    req.body.status.map(status => {
+      statusCondition.push({status: status});
+    });
+    if(statusCondition.length > 0) conditions['$and'].push({$or: statusCondition});
+  }
+  
+  if(!req.body.pulp || !req.body.terror || !req.body.politician) {
+    let typeCondition = [];
+    if(req.body.pulp) {
+      typeCondition.push({illegaltype: /色情/g});
+    }
+    if(req.body.terror) {
+      typeCondition.push({illegaltype: /暴力/g});
+    }
+    if(req.body.politician) {
+      typeCondition.push({illegaltype: /敏感人物/g});
+    }
+    if(typeCondition.length > 0) {
+      conditions['$and'].push({$or: typeCondition});
+    }
+  }
+
+  console.log('conditions: ', JSON.stringify(conditions));
+  apphelper.getIllegalDataFromUrlTable(conditions, req.body.size, req.body.page*req.body.size, req.body.orderby).then(data => {
     res.send(data);
   }).catch(err => res.send(err));
 });
@@ -152,11 +167,15 @@ router.post('/updatefusionstatus', function(req, res, next) {
 router.post('/updatefusionstatusbydomain', function(req, res, next) {
   apphelper.updateURLStatusByDomain([{
     domain: req.body.domain,
-    status: req.body.domainstatus
+    status: req.body.status,
+    notes: req.body.notes,
+    isshow: req.body.isshow
   }]).then(()  => {
     apphelper.updateURLStatusByURL([{
       url: req.body.url,
-      status: req.body.urlstatus
+      notes: req.body.notes,
+      status: req.body.status,
+      isshow: true
     }]).then(result  => {
       res.send({
         code: 200,
@@ -170,6 +189,16 @@ router.post('/updatefusionstatusbydomain', function(req, res, next) {
   });
 });
 
+
+/* ====================== *\
+        debug api 
+\* ====================== */
+//  atlabhelper
+router.get('/debug', function(req, res, next) {
+  sjob.getDebug().then(data => {
+    res.send(data);
+  }).catch(err => res.send(err));
+});
 
 /*=====================*\
           Helper

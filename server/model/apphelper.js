@@ -19,9 +19,9 @@ class appHelper {
     }
 
     // get data from <url> table
-    async getIllegalDataFromUrlTable(conditions={}, size=50, skip=0) {
+    async getIllegalDataFromUrlTable(conditions={}, size=50, skip=0, orderby) {
         console.log('|** appHelper.getIllegalDataFromUrlTable **| INFO: get data from <url> table for list view| ', new Date());
-        let res = await DBConn.queryData('illegal', conditions, size, skip, 'domain', 1).catch(err => {console.log(err); return []});
+        let res = await DBConn.queryData('illegal', conditions, size, skip, orderby, 1).catch(err => {console.log(err); return []});
         let count = await DBConn.count('illegal', conditions).catch(err => {console.log(err); return []});
         console.log('count: ',count);
         return {
@@ -43,6 +43,8 @@ class appHelper {
                 filter: {url: datum.url},
                 update: {$set: {
                     status: datum.status,
+                    notes: datum.notes,
+                    isshow: true,
                     update_date: new Date().getTime()
                 }}
             }
@@ -56,9 +58,11 @@ class appHelper {
         console.log('|** appHelper.updateURLStatusByDomain **| INFO: update status for data in <url> table| ', new Date());
         let operations = data.map(datum => {return {
             updateMany: {
-                filter: {$and: [{isillegal: 1},{domain: datum.domain}]},
+                filter: {domain: datum.domain},
                 update: {$set: {
                     status: datum.status,
+                    notes: datum.notes,
+                    isshow: datum.isshow,
                     update_date: new Date().getTime()
                 }}
             }

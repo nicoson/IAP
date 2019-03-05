@@ -32,6 +32,10 @@ class scheduleJob {
             console.log('==============>    aijob start ...!');
             this.updateURLTableByAPI();
         }.bind(this));
+
+        // video jobs
+        ah.videoJobControl();
+        ah.videoJobCheckControl();
     }
 
     destoryJobs() {
@@ -74,7 +78,7 @@ class scheduleJob {
     }
 
     updateURLTableByAPI() {
-        let endTime = [5,0,0]; // stop api call before 5 am, use UTC Time zoom 8
+        let endTime = [11,0,0]; // stop api call before 5 am, use UTC Time zoom 8
         let today = new Date();
         let date = [today.getFullYear(), today.getMonth(), today.getDate()];
         if(today.getTime() < new Date(...date, ...endTime).getTime()) {
@@ -97,6 +101,13 @@ class scheduleJob {
 
     testUpdate() {
         console.log('info: test triggered: ', new Date());
+    }
+
+    getDebug() {
+        return {
+            joblist: ah.videoJobList,
+            catcherr: ah.errCatchInfo
+        }
     }
 }
 

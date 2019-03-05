@@ -14,8 +14,9 @@ module.exports = {
     FUSIONDOMAIN: 'http://fusiondomain.fusion.internal.qiniu.io',   // get uid by domain
 
     //  atlab inference api
-    CENSORIMGAPI:   'http://ai.qiniuapi.com/v1/image/censor',
-    CENSORVIDEOAPI: "http://100.100.62.134:11000/v1/video/666",
+    CENSORIMGAPI:   'http://ai.qiniuapi.com/v3/image/censor',
+    CENSORVIDEOAPI: 'http://ai.qiniuapi.com/v3/video/censor',
+    CENSORVIDEOJOBAPI: 'http://ai.qiniuapi.com/v3/jobs/video',
 
     //  others
     UPLOAD_PATH:    "./public/files",

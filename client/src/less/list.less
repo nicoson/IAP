@@ -17,6 +17,26 @@ section {
         border: 1px solid #aaa;
     }
 
+    >div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        label {
+            padding: .5rem;
+            input {
+                margin: 0 .5rem 0 0;
+            }
+        }
+
+        >div {
+            height: 100%;
+            background: #eee;
+            padding: .5rem 1rem;
+            border-left: 1px solid #ccc;
+        }
+    }
+
     >button {
         margin-left: 1rem;
         height: min-content;
@@ -37,19 +57,24 @@ table#wa_list_table {
     width: 100%;
 
     td,th {
-        width: 10%;
+        width: 5%;
         padding: .5rem;
         border: 1px solid #00a7de56;
         text-align: center;
-        word-wrap: break-word;
-        word-break: break-all;
+        white-space: nowrap;
 
         // &:hover {
         //     cursor: pointer;
         // }
 
-        img {
+        img, video {
             width: 10rem;
+        }
+
+        &.wa-list-table-wordwrap {
+            word-wrap: break-word;
+            word-break: break-all;
+            white-space: normal;
         }
     }
 
@@ -289,6 +314,13 @@ table#wa_list_table {
     }
 
     button {
-        height: min-content;
+        // height: min-content;
+    }
+}
+
+#wa_list_operation_checkbox {
+    padding: .5rem;
+    label:hover {
+        cursor: pointer;
     }
 }

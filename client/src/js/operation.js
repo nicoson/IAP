@@ -17,8 +17,9 @@ window.onload = function() {
 
 function init() {
     document.querySelector('#wa_list_table_datefrom').value = SEARCHCONFIG.startDate;
-    document.querySelector('#wa_list_table_dateto').value = SEARCHCONFIG.endDate;
+    document.querySelector('#wa_list_table_dateto').value = getDateString(new Date());
     document.querySelector('#wa_list_table_handled').checked = SEARCHCONFIG.handled;
+    document.querySelector('#wa_list_table_specialhandled').checked = SEARCHCONFIG.specialhandled;
     document.querySelector('#wa_list_table_unhandle').checked = SEARCHCONFIG.unhandle;
     document.querySelector('#wa_list_table_checkbox_pulp').checked = SEARCHCONFIG.pulp;
     document.querySelector('#wa_list_table_checkbox_terror').checked = SEARCHCONFIG.terror;
@@ -41,6 +42,9 @@ function getTableList(isAppend = false) {
     if(document.querySelector('#wa_list_table_handled').checked) {
         status.push(4,6);   //  4+6:    单链、域名处置
     }
+    if(document.querySelector('#wa_list_table_specialhandled').checked) {
+        status.push(11);    //  11:     特殊处置
+    }
     if(document.querySelector('#wa_list_table_unhandle').checked) {
         status.push(2,8);   //  2+8:    单链、域名流转
     }
@@ -53,7 +57,9 @@ function getTableList(isAppend = false) {
         pulp: document.querySelector('#wa_list_table_checkbox_pulp').checked,
         terror: document.querySelector('#wa_list_table_checkbox_terror').checked,
         politician: document.querySelector('#wa_list_table_checkbox_politician').checked,
-        status: status
+        status: status,
+        filetype: 'both',
+        orderby: 'update_date'
     });
     toggleLoadingModal();
     fetch(url, postBody).then(e => e.json()).then(data => {
@@ -102,6 +108,7 @@ function fillListTable(ele, data, isAppend=false) {
     let list = isAppend ? '' : `<tr class="wa-list-table-tr-main">
                                     <th>序号</th>
                                     <th>查处日期</th>
+                                    <th>更新日期</th>
                                     <th>文件外链</th>
                                     <th>域名（点击展开详情）</th>
                                     <th>文件名</th>
@@ -109,27 +116,32 @@ function fillListTable(ele, data, isAppend=false) {
                                     <th>涉嫌违规类型</th>
                                     <th>分值</th>
                                     <th>状态</th>
+                                    <th>备注</th>
                                     <th>操作</th>
                                 </tr>`;
 
     for(let i in data) {
         list += `<tr class="wa-list-table-tr-main" data-ind="${PAGENUM*PAGESIZE + Number(i)}">
-                    <td><input type="checkbox" class="js-wa-operation-checkbox" data-url="${data[i].url}" />&nbsp;${PAGENUM*PAGESIZE + Number(i) + 1}</td>
+                    <td><input type="checkbox" class="js-wa-operation-checkbox" data-url="${data[i].url}" data-index=${i} />&nbsp;${PAGENUM*PAGESIZE + Number(i) + 1}</td>
                     <td>${new Date(data[i].create_date).toJSON().slice(0,19).replace('T', '<br />')}</td>
-                    <td><a href="${data[i].url}" target="_blank">${data[i].url}</td>
-                    <td onclick="toggleTableRow(event)"><p>${data[i].domain}</p></td>
-                    <td><p>${decodeURI(data[i].url.split('/').slice(-1)[0])}</p></td>
+                    <td>${new Date(data[i].update_date).toJSON().slice(0,19).replace('T', '<br />')}</td>
+                    <td class="wa-list-table-wordwrap"><a href="${data[i].url}" target="_blank">${data[i].url}</td>
+                    <td class="wa-list-table-wordwrap" onclick="toggleTableRow(event)"><p>${data[i].domain}</p></td>
+                    <td class="wa-list-table-wordwrap"><p>${decodeURI(data[i].url.split('/').slice(-1)[0])}</p></td>
                     <td>${data[i].filetype}</td>
-                    <td>${data[i].illegaltype?data[i].illegaltype.map(e=>e.replace('- undefined','')):''}</td>
-                    <td>${data[i].score}</td>
+                    <td class="wa-list-table-wordwrap">${data[i].illegaltype?data[i].illegaltype.map(e=>e.replace('- undefined','')):''}</td>
+                    <td>${Math.floor(parseFloat(data[i].score)*100)/100}</td>
                     <td class="js-wa-list-status">${statusTrans(data[i].status)}</td>
-                    <td>` + 
-                    ((data[i].status == 2) ? 
+                    <td class="wa-list-table-wordwrap">${(typeof(data[i].notes)=='undefined' || data[i].notes == null)?'无':data[i].notes}</td>
+                    <td class="wa-list-table-wordwrap">` + 
+                    ((data[i].status == 2) ?
                         `<button class="btn-warning" onclick="updateStatus(event,5)">驳回外链</button>
-                        <button class="btn-primary" onclick="updateStatus(event,4)">封禁外链</button>` :
+                        <button class="btn-primary" onclick="updateStatus(event,4)">封禁外链</button>
+                        <button class="btn-success" onclick="confirmPanel(event,1,11)">特殊处理</button>` :
                         ((data[i].status == 8) ?
-                        `<button class="btn-warning" onclick="updateStatusByDomain(event,5,5)">驳回域名</button>
-                        <button class="btn-danger" onclick="updateStatusByDomain(event,6,10)">封禁域名</button>` : "已操作")) +
+                        `<button class="btn-warning" onclick="updateStatusByDomain(event,5,true)">驳回域名</button>
+                        <button class="btn-danger" onclick="updateStatusByDomain(event,6,false)">封禁域名</button>
+                        <button class="btn-success" onclick="confirmPanel(event,2,11)">特殊处理</button>` : "已操作")) +
                     `</td>
                 </tr>
                 <tr class="component-hidden"></tr>`;
@@ -322,39 +334,44 @@ function statusTrans(code) {
             return '已失效';
         case 8:
             return '域名违禁流转';
+        case 11:
+            return '特殊处理';
         default:
             return 'err';
     }
 }
 
-function updateStatus(event, status) {
+function updateStatus(event, status, notes=null) {
     event.stopPropagation();
     let url = APIHOST + '/updatefusionstatus';
     postBody.body = JSON.stringify({
         url: DATA[event.target.closest('tr').dataset.ind].url,
-        status: status
+        status: status,
+        notes: notes
     });
     toggleLoadingModal();
     let ele = event.target.closest('tr').querySelector('td.js-wa-list-status');
     fetch(url, postBody).then(e => e.json()).then(res => {
         console.log(res);
         if(res.code == 200) {
-            ele.innerHTML = statusTrans(status);
+            // ele.innerHTML = statusTrans(status);
+            reloadData();
         }
         // fillSubTable(ele, data, info);
         toggleLoadingModal();
     });
 }
 
-function updateStatusByDomain(event, urlstatus, domainstatus) {
+function updateStatusByDomain(event, status, isshow, notes=null) {
     event.stopPropagation();
 
     let url = APIHOST + '/updatefusionstatusbydomain';
     postBody.body = JSON.stringify({
         url: DATA[event.target.closest('tr').dataset.ind].url,
         domain: DATA[event.target.closest('tr').dataset.ind].domain,
-        urlstatus: urlstatus,
-        domainstatus: domainstatus
+        status: status,
+        notes: notes,
+        isshow: isshow
     });
     toggleLoadingModal();
     fetch(url, postBody).then(e => e.json()).then(res => {
@@ -375,6 +392,9 @@ function changeConfig(event, item) {
             SEARCHCONFIG[item] = event.target.value;
             break;
         case 'handled':
+            SEARCHCONFIG[item] = event.target.checked;
+            break;
+        case 'specialhandled':
             SEARCHCONFIG[item] = event.target.checked;
             break;
         case 'unhandle':
@@ -406,6 +426,53 @@ function getLinks(event) {
     alert('链接已经复制到粘贴板！');
 }
 
+function toggleCheckAll(event) {
+    let value = document.querySelector('#wa_list_operation_checkall').checked;
+    let elem = document.querySelectorAll('.js-wa-operation-checkbox');
+    elem.forEach(ele => {
+        ele.checked = value;
+    });
+}
+
+function exportTrigger(event) {
+    let table = document.createElement('table');
+    let tmp = `<tr class="wa-list-table-tr-main">
+                    <th>查处日期</th>
+                    <th>文件外链</th>
+                    <th>域名</th>
+                    <th>文件类型</th>
+                    <th>涉嫌违规类型</th>
+                    <th>状态</th>
+                </tr>`;
+    let elem = document.querySelectorAll('.js-wa-operation-checkbox:checked');
+    if(elem.length > 0) {
+        elem.forEach(ele => {
+            let ind = ele.dataset.index;
+            tmp += `<tr>
+                        <td>${new Date(DATA[ind].create_date).toJSON().slice(0,19).replace('T',' ')}</td>
+                        <td><a href="${DATA[ind].url}" target="_blank">${DATA[ind].url}</td>
+                        <td><p>${DATA[ind].domain}</p></td>
+                        <td>${DATA[ind].filetype}</td>
+                        <td>${DATA[ind].illegaltype?DATA[ind].illegaltype.map(e=>e.replace('- undefined','')):''}</td>
+                        <td>${statusTrans(DATA[ind].status)}</td>
+                    </tr>`
+        });
+        table.innerHTML = tmp;
+        exportExcel(table);
+    }
+}
+
+function confirmPanel(event, type, status) {
+    var notes = window.prompt("请输入备注原因: ","");
+    if(notes == null) return;
+    if(type == 1) {
+        updateStatus(event, status, notes);
+    } else {
+        updateStatusByDomain(event, status, false, notes);
+    }
+}
+
+
 /*==========================================*\
    excel export component: use filesaver.js
 \*==========================================*/
@@ -436,9 +503,9 @@ function getExplorer() {
 }
   
 //获取到类型需要判断当前浏览器需要调用的方法，目前项目中火狐，谷歌，360没有问题
-function exportExcel(tableid) {
+function exportExcel(table) {
     if(getExplorer()=='ie') {
-        var curTbl = document.getElementById(tableid);
+        var curTbl = table;//document.getElementById(tableid);
         var oXL = new ActiveXObject("Excel.Application");
         var oWB = oXL.Workbooks.Add();
         var xlsheet = oWB.Worksheets(1);
@@ -462,8 +529,8 @@ function exportExcel(tableid) {
         }
 
     } else {
-        fname = `上报文件 ${getDateString(new Date())}.xls`;
-        tableToExcel(tableid, fname)
+        fname = `违规文件 ${getDateString(new Date())}.xls`;
+        tableToExcel(table, fname)
     }
 }
 
@@ -474,7 +541,7 @@ function Cleanup() {
 
 //判断浏览器后调用的方法，把table的id传入即可
 function tableToExcel(table, name) {
-    var template = `<html><head><meta charset="UTF-8"><style>td,th{border: 0.5px solid black;}</style></head><body><table>${document.getElementById(table).innerHTML}</table></body></html>`
+    var template = `<html><head><meta charset="UTF-8"><style>td,th{border: 0.5px solid black;}</style></head><body><table>${table.innerHTML}</table></body></html>`
     var blob = new Blob([template], {
         type: "application/vnd.ms-excel;charset=charset=utf-8"
     });

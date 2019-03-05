@@ -21,7 +21,7 @@ window.onload = function() {
 
 function init() {
     document.querySelector('#wa_list_table_datefrom').value = SEARCHCONFIG.startDate;
-    document.querySelector('#wa_list_table_dateto').value = SEARCHCONFIG.endDate;
+    document.querySelector('#wa_list_table_dateto').value = getDateString(new Date());//SEARCHCONFIG.endDate;
     document.querySelector('#wa_list_table_score').value = SEARCHCONFIG.score;
     document.querySelector('#wa_list_table_checkbox_1').checked = SEARCHCONFIG.check1;
     document.querySelector('#wa_list_table_checkbox_2').checked = SEARCHCONFIG.check2;
@@ -48,19 +48,19 @@ function getTableList(isAppend = false) {
     let url = APIHOST + '/getfusiondata';
     let status = [];
     if(document.querySelector('#wa_list_table_checkbox_1').checked) {
-        status.push(1,5);   //  1+5:    待审核 + 驳回
+        status.push(1,5);       //  1+5:    待审核 + 驳回
     }
     if(document.querySelector('#wa_list_table_checkbox_2').checked) {
-        status.push(2,8);   //  2+8:    单外链违规流转
+        status.push(2,8);       //  2+8:    外链 + 域名违规流转
     }
     if(document.querySelector('#wa_list_table_checkbox_3').checked) {
-        status.push(3);     //  3:      无需处理
+        status.push(3);         //  3:      无需处理
     }
     if(document.querySelector('#wa_list_table_checkbox_4').checked) {
-        status.push(4,6);   //  4+6:    单外链 + 域名违规封禁（已处理）
+        status.push(4,6,11);    //  4+6:    单外链 + 域名违规封禁（已处理）+ 特殊处理
     }
     if(document.querySelector('#wa_list_table_checkbox_5').checked) {
-        status.push(7);     //  7:      失效
+        status.push(7);         //  7:      失效
     }
     postBody.body = JSON.stringify({
         startDate: startDate,
@@ -71,7 +71,9 @@ function getTableList(isAppend = false) {
         pulp: document.querySelector('#wa_list_table_checkbox_pulp').checked,
         terror: document.querySelector('#wa_list_table_checkbox_terror').checked,
         politician: document.querySelector('#wa_list_table_checkbox_politician').checked,
-        status: status
+        filetype: document.querySelector('#wa_list_table_radio_image').checked ? 'image' : 'video',
+        status: status,
+        orderby: 'domain'
     });
     toggleLoadingModal();
     fetch(url, postBody).then(e => e.json()).then(data => {
@@ -120,6 +122,7 @@ function fillListTable(ele, data, isAppend=false) {
     let list = isAppend ? '' : `<tr class="wa-list-table-tr-main">
                                     <th>序号</th>
                                     <th>查处日期</th>
+                                    <th>更新日期</th>
                                     <th>文件</th>
                                     <th>域名（点击展开详情）</th>
                                     <th>文件名</th>
@@ -131,19 +134,26 @@ function fillListTable(ele, data, isAppend=false) {
                                 </tr>`;
 
     for(let i in data) {
+        let thumb = '';
+        if(data[i].filetype == 'image') {
+            thumb = `<img class="ja-wa-list-img-placehold" data-src="${data[i].url}" />`;
+        } else {
+            thumb = `<video src="${data[i].url}" />`;
+        }
         list += `<tr class="wa-list-table-tr-main" data-ind="${PAGENUM*PAGESIZE + Number(i)}">
                     <td>${PAGENUM*PAGESIZE + Number(i) + 1}</td>
                     <td>${new Date(data[i].create_date).toJSON().slice(0,19).replace('T', '<br />')}</td>
-                    <td><a href="${data[i].url}" target="_blank"><img class="ja-wa-list-img-placehold" data-src="${data[i].url}" /></a></td>
-                    <td onclick="toggleTableRow(event)"><p>${data[i].domain}</p></td>
-                    <td><p>${decodeURI(data[i].url.split('/').slice(-1)[0])}</p></td>
+                    <td>${new Date(data[i].update_date).toJSON().slice(0,19).replace('T', '<br />')}</td>
+                    <td><a href="${data[i].url}" target="_blank">${thumb}</a></td>
+                    <td class="wa-list-table-wordwrap" onclick="toggleTableRow(event)"><p>${data[i].domain}</p></td>
+                    <td class="wa-list-table-wordwrap"><p>${decodeURI(data[i].url.split('/').slice(-1)[0])}</p></td>
                     <td>${data[i].filetype}</td>
-                    <td>${data[i].illegaltype?data[i].illegaltype.map(e=>e.replace('- undefined','')):''}</td>
-                    <td>${data[i].score}</td>
+                    <td class="wa-list-table-wordwrap">${data[i].illegaltype?data[i].illegaltype.map(e=>e.replace('- undefined','')):''}</td>
+                    <td>${Math.floor(parseFloat(data[i].score)*100)/100}</td>
                     <td class="js-wa-list-status">${statusTrans(data[i].status)}</td>
-                    <td>` +
+                    <td class="wa-list-table-wordwrap">` +
                         ((data[i].status == 4 || data[i].status == 6) ? "已处理" :
-                        `<button class="btn-success" onclick="updateStatus(event,3)">无害</button>
+                        `<button class="btn-success" onclick="updateStatus(event,3)">内容无害</button>
                         <button class="btn-secondary" onclick="updateStatus(event,7)">外链失效</button>
                         <button class="btn-warning" onclick="updateStatus(event,2)">外链违规</button>
                         <button class="btn-danger" onclick="setIllegalDomain(event)">域名违规</button>`) +
@@ -345,39 +355,43 @@ function statusTrans(code) {
             return '已失效';
         case 8:
             return '域名违禁流转';
+        case 11:
+            return '特殊处置';
         default:
             return 'err';
     }
 }
 
-function updateStatus(event, status) {
+function updateStatus(event, status, notes=null) {
     event.stopPropagation();
     let url = APIHOST + '/updatefusionstatus';
     postBody.body = JSON.stringify({
         url: DATA[event.target.closest('tr').dataset.ind].url,
-        status: status
+        status: status,
+        notes: notes
     });
     toggleLoadingModal();
     let ele = event.target.closest('tr').querySelector('td.js-wa-list-status');
     fetch(url, postBody).then(e => e.json()).then(res => {
         console.log(res);
         if(res.code == 200) {
-            ele.innerHTML = statusTrans(status);
+            reloadData();
         }
         // fillSubTable(ele, data, info);
         toggleLoadingModal();
     });
 }
 
-function setIllegalDomain(event) {
+function setIllegalDomain(event, notes=null) {
     event.stopPropagation();
 
     let url = APIHOST + '/updatefusionstatusbydomain';
     postBody.body = JSON.stringify({
         url: DATA[event.target.closest('tr').dataset.ind].url,
         domain: DATA[event.target.closest('tr').dataset.ind].domain,
-        urlstatus: 8,
-        domainstatus: 9
+        status: 8,
+        notes: notes,
+        isshow: false
     });
     toggleLoadingModal();
     fetch(url, postBody).then(e => e.json()).then(res => {
@@ -425,6 +439,12 @@ function changeConfig(event, item) {
         case 'politician':
             SEARCHCONFIG[item] = event.target.checked;
             break;
+        // case 'image':
+        //     SEARCHCONFIG[item] = event.target.checked;
+        //     break;
+        // case 'video':
+        //     SEARCHCONFIG[item] = event.target.checked;
+        //     break;
     }
     localStorage.config = JSON.stringify(SEARCHCONFIG);
 }

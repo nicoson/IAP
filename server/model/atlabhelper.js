@@ -4,15 +4,15 @@ const genToken  = require('./genToken');
 const CONFIG = require('./config');
 let gt = new genToken();
 
-const APIHOST = CONFIG.CENSORIMGAPI;  // get active domain for specified day
-
-
 class atlabHelper {
     constructor() {
         this.options = {
             method: 'POST',
             headers: {'Content-Type': 'application/json'}
-        }
+        };
+        this.videoJobList = new Set();
+        this.videoJobInfo = {};
+        this.errCatchInfo = '';
     }
 
     /* ========================= *\
@@ -24,29 +24,28 @@ class atlabHelper {
                 "uri": url
             },
             "params": {
-                "type": [
+                //  image params
+                "scenes": [
                     "pulp",
                     "terror",
                     "politician"
-                ],
-                "detail": true
+                ]
             }
         });
-        
-        let token = gt.genToken(APIHOST, this.options.body);
-        this.options.headers.Authorization = token;
 
         return new Promise(function(resolve, reject){
             // console.log('============> get: ', url);
             if(this.fileType(url) == 'image') {
-                fetch(APIHOST, this.options).then(e => e.json()).then(data => {
+                let token = gt.genToken(CONFIG.CENSORIMGAPI, this.options.body);
+                this.options.headers.Authorization = token;
+                fetch(CONFIG.CENSORIMGAPI, this.options).then(e => e.json()).then(data => {
                     resolve(data);
                 }).catch(err => {
-                    console.log(`[ERROR] |** atlabhelper.censorCall <${new Date()}> **| CensorCall error msg: ${err}`);
+                    console.log(`[ERROR] |** atlabhelper.censorCall image call <${new Date()}> **| CensorCall error msg: ${err}`);
                     resolve(-1);
                 });
             } else if(this.fileType(url) == 'video') {
-                resolve(-1);
+                resolve(-2);
             } else {
                 resolve(-1);
             }
@@ -144,6 +143,144 @@ class atlabHelper {
         }
     }
 
+    videoJobControl() {
+        let concurrency = 100;
+        let interval = 500;
+        if(this.videoJobList.size >= concurrency) interval = 30000;
+        this.videoCensorCall(concurrency).then(e => {});
+        console.log(`[INFO] |** atlabhelper.videoJobControl <${new Date()}> **| current pool size: ${this.videoJobList.size}`);
+        setTimeout(function(){this.videoJobControl();}.bind(this), interval);
+    }
+
+    async videoJobCheckControl() {
+        let interval = 10000;
+        console.log('start to check the results ...');
+        if(this.videoJobList.size <= 0) {
+            interval = 30000;
+        } else {
+            for(let jobid of this.videoJobList) {
+                await this.videoResultCheck(jobid).then(e => {});
+                await this.sleep(1000);
+            }
+        }
+        
+        console.log(`[INFO] |** atlabhelper.videoJobCheckControl <${new Date()}> **| current pool size: ${this.videoJobList.size}`);
+        setTimeout(function(){this.videoJobCheckControl();}.bind(this), interval);
+    }
+
+    async videoCensorCall(concurrency=100) {
+        if(this.videoJobList.size >= concurrency) return;
+        try {
+            let data = await DBConn.queryData('url', {$and: [{url: /\.rm|\.mp4|\.avi|\.wmv|\.3gp/}, {$or: [{status: null}, {machineresult: -2}]}]}, 1, this.videoJobList.size);
+            if(data.length == 0) {
+                console.log(`[INFO] |** atlabhelper.videoCensorCall video call <${new Date()}> **| no more video files in url table!`);
+                return;
+            }
+
+            let options = {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            };
+            options.body = JSON.stringify({
+                "data": {
+                    "uri": data[0].url
+                },
+                "params": {
+                    "scenes": [
+                        "pulp",
+                        "terror",
+                        "politician"
+                    ],
+                    "cut_param": {
+                        "interval_msecs": 5000
+                    }
+                }
+            });
+            
+            let token = gt.genToken(CONFIG.CENSORVIDEOAPI, options.body);
+            options.headers.Authorization = token;
+            // console.log('options: ', options);
+            let jobid = await fetch(CONFIG.CENSORVIDEOAPI, options).then(e => e.json()).catch(err => {
+                console.log(`[ERROR] |** atlabhelper.videoCensorCall video call <${new Date()}> **| videoCensorCall error msg: ${err}`);
+            });
+            this.videoJobList.add(jobid.job);
+            this.videoJobInfo[jobid.job] = data[0];
+            // console.log('jobid: ', jobid);
+            return;
+        }
+        catch(err) {
+            console.log(`[ERROR] |** atlabhelper.videoCensorCall <${new Date()}> **| function body error msg: ${err}`);
+            return;
+        }
+    }
+
+    async videoResultCheck(jobid = null) {
+        try {
+            if(this.videoJobList.size == 0 && jobid == null) return 'no jobs';
+
+            let jobinfo = this.videoJobInfo[jobid];
+            let url = `${CONFIG.CENSORVIDEOJOBAPI}/${jobid}`;
+            let options = {
+                method: 'GET',
+                headers: {'Content-Type': 'application/json'}
+            };
+            let token = gt.genToken(url, '', 'GET');
+            options.headers.Authorization = token;
+            // console.log('options: ', options);
+            if(this.videoJobList.size > 0) {
+                let res = await fetch(url, options).then(e => e.json()).catch(err => console.log('err: ', err));
+                // console.log('video result check: ', JSON.stringify(res));
+                this.resVideoHandler(res, jobinfo);
+                let operations = [{
+                    updateOne: {
+                        filter: {url: res.request.data.uri},
+                        update: {$set: jobinfo},
+                        upsert: true
+                    }
+                }];
+                // console.log('operations: ', JSON.stringify(operations));
+                if(res.status == 'FINISHED') {
+                    if(jobinfo.isillegal == 1) {
+                        await DBConn.updateData('illegal', operations).catch(err => console.log(`[ERROR] |** atlabhelper.videoResultCheck update illegal table error <${new Date()}> **| data update failed due to: ${err}`));
+                    }
+                } else if (res.status == 'FAILED') {
+                    console.log('audit video failed ......... ');
+                } else if (typeof(res.error) != 'undefined') {
+                    console.log('video file lost ......... ');
+                } else {
+                    // not finished, skip to wait
+                    console.log(`[INFO] |** atlabhelper.videoResultCheck <${new Date()}> **| Job info: ${res}`);
+                    return res;
+                }
+                await DBConn.updateData('url', operations).catch(err => console.log(`[ERROR] |** atlabhelper.videoResultCheck update url table error <${new Date()}> **| data update failed due to: ${err}`));
+                this.videoJobList.delete(jobid);
+                delete this.videoJobInfo[jobid];
+                console.log('job ', jobid, ' done!!!');
+                console.log('video job list: ', this.videoJobList.size);
+                // console.log('job list: ', this.videoJobList);
+                return res;
+            }
+        }
+        catch(err) {
+            this.errCatchInfo = err;
+        }
+        return 'no jobs';
+    }
+
+    async videoSimpleCheck(jobid = null) {
+        if(this.videoJobList.size == 0 && jobid == null) return 'no jobs';
+
+        let url = `${CONFIG.CENSORVIDEOJOBAPI}/${jobid}`;
+        let options = {
+            method: 'GET',
+            headers: {'Content-Type': 'application/json'}
+        };
+        let token = gt.genToken(url, '', 'GET');
+        options.headers.Authorization = token;
+        let res = await fetch(url, options).then(e => e.json()).catch(err => console.log('err: ', err));
+        return res;
+    }
+
     saveData(data, process=0) {
         let operations = data.map(datum => {return {
             updateOne: {
@@ -176,6 +313,13 @@ class atlabHelper {
                 illegaltype: 'unknown file',
                 score: -1
             }
+        } else if (data == -2) {
+            console.log('data: video data');
+            return {
+                isillegal: null,
+                illegaltype: 'video file, leave for video handle',
+                score: null
+            }
         } else if (data.error) {
             console.log('data: image size too small < 32x32');
             return {
@@ -183,39 +327,34 @@ class atlabHelper {
                 illegaltype: 'small image file',
                 score: -1
             }
-        } else if (data.code == 0) {
-            if(data.result.label == 0) {
+        } else if (data.code == 200) {
+            if(data.result.suggestion == 'pass') {
                 return {
                     isillegal: 0,
                     illegaltype: 'normal',
-                    score: data.result.score
+                    score: 0
                 }
             } else {
                 let type = [];
-                for(let item of data.result.details) {
-                    switch(item.type) {
-                        case 'pulp':
-                            if(item.label == 0) {
-                                type.push('色情');
-                            }
-                            break;
-                        case 'terror':
-                            if(item.label == 1) {
-                                type.push('暴力');
-                            }
-                            break;
-                        case 'politician':
-                            if(item.label == 1) {
-                                type.push('敏感人物 - ' + item.more[0].value.name);
-                            }
-                            break;
-                    }
-                }
+                let scorelist = [];
+
+                if(data.result.scenes.pulp.suggestion != 'pass') {
+                    type.push('色情');
+                    scorelist.push(data.result.scenes.pulp.details[0].score);
+                };
+                if(data.result.scenes.terror.suggestion != 'pass') {
+                    type.push('暴力');
+                    scorelist.push(data.result.scenes.terror.details[0].score);
+                };
+                if(data.result.scenes.politician.suggestion != 'pass') {
+                    type.push('敏感人物');
+                    scorelist.push(data.result.scenes.politician.details[0].score);
+                };
                 
                 return {
                     isillegal: 1,
                     illegaltype: type,
-                    score: data.result.score
+                    score: Math.max(...scorelist)
                 }
             }
         } else {
@@ -227,6 +366,69 @@ class atlabHelper {
         }
     }
 
+    resVideoHandler(data, jobinfo) {
+        if(data.status == 'FINISHED') {
+            if(data.result.result.suggestion == 'pass') {
+                jobinfo.illegaltype = '';
+                jobinfo.isillegal = 0;
+                jobinfo.score = 0;
+                jobinfo.machineresult = data.result;
+                jobinfo.status = 1;
+            } else {
+                let type = [];
+                let scorelist = [];
+                if(data.result.result.scenes.pulp.suggestion != 'pass') {
+                    type.push('色情');
+                    scorelist.push(data.result.result.scenes.pulp.cuts.reduce((score, e) => {
+                        if(e.details[0].suggestion!='pass'){
+                            return Math.max(e.details[0].score, score);
+                        }else{
+                            return score;
+                        }
+                    }, 0));
+                };
+                if(data.result.result.scenes.terror.suggestion != 'pass') {
+                    type.push('暴力');
+                    scorelist.push(data.result.result.scenes.terror.cuts.reduce((score, e) => {
+                        if(e.details[0].suggestion!='pass'){
+                            return Math.max(e.details[0].score, score);
+                        }else{
+                            return score;
+                        }
+                    }, 0));
+                };
+                if(data.result.result.scenes.politician.suggestion != 'pass') {
+                    type.push('敏感人物');
+                    scorelist.push(data.result.result.scenes.politician.cuts.reduce((score, e) => {
+                        if(e.suggestion != 'pass'){
+                            return Math.max(e.details[0].score, score);
+                        }else{
+                            return score;
+                        }
+                    }, 0));
+                };
+                jobinfo.illegaltype = type;
+                jobinfo.isillegal = 1;
+                jobinfo.score = Math.max(...scorelist);
+                jobinfo.machineresult = data.result;
+                jobinfo.status = 1;
+            }
+        } else if(data.status == 'FAILED') {
+            jobinfo.illegaltype = 'audit process failed';
+            jobinfo.isillegal = 0;
+            jobinfo.score = 0;
+            jobinfo.machineresult = -1;
+            jobinfo.status = 1;
+        } else if(typeof(data.error) != 'undefined') {
+            jobinfo.illegaltype = data.error;
+            jobinfo.isillegal = 0;
+            jobinfo.score = 0;
+            jobinfo.machineresult = -1;
+            jobinfo.status = 1;
+            console.log('inference error');
+        }
+    }
+
     fileType(url) {
         if(url.search(/\.png|\.jpg|\.jpeg|\.webp|\.bmp|\.gif/i) > -1) {
             return 'image';
@@ -235,6 +437,14 @@ class atlabHelper {
         } else {
             return 'unknown';
         }
+    }
+
+    sleep(period) {
+        return new Promise(function(resolve, reject) {
+            setTimeout(function() {
+                resolve('done');
+            }, period);
+        });
     }
 }
 

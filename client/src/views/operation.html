@@ -23,11 +23,16 @@
             <div>
                 开始日期 <input id="wa_list_table_datefrom" type="date" onchange="changeConfig(event,'startDate')" /> 
                 截止日期 <input id="wa_list_table_dateto" type="date" onchange="changeConfig(event,'endDate')" />
-                <label for="wa_list_table_handled"><input id="wa_list_table_handled" type="checkbox" checked onchange="changeConfig(event,'handled')" />已处置</label>
-                <label for="wa_list_table_unhandle"><input id="wa_list_table_unhandle" type="checkbox" checked onchange="changeConfig(event,'unhandle')" />待处置</label>
-                <label for="wa_list_table_checkbox_pulp"><input id="wa_list_table_checkbox_pulp" type="checkbox" checked onchange="changeConfig(event,'pulp')" />涉黄</label>
-                <label for="wa_list_table_checkbox_terror"><input id="wa_list_table_checkbox_terror" type="checkbox" checked onchange="changeConfig(event,'terror')" />涉暴</label>
-                <label for="wa_list_table_checkbox_politician"><input id="wa_list_table_checkbox_politician" type="checkbox" checked onchange="changeConfig(event,'politician')" />涉政</label>
+                <div>
+                    <label for="wa_list_table_handled"><input id="wa_list_table_handled" type="checkbox" checked onchange="changeConfig(event,'handled')" />已封禁</label>
+                    <label for="wa_list_table_specialhandled"><input id="wa_list_table_specialhandled" type="checkbox" checked onchange="changeConfig(event,'specialhandled')" />特殊处置</label>
+                    <label for="wa_list_table_unhandle"><input id="wa_list_table_unhandle" type="checkbox" checked onchange="changeConfig(event,'unhandle')" />待处置</label>
+                </div>
+                <div>
+                    <label for="wa_list_table_checkbox_pulp"><input id="wa_list_table_checkbox_pulp" type="checkbox" checked onchange="changeConfig(event,'pulp')" />涉黄</label>
+                    <label for="wa_list_table_checkbox_terror"><input id="wa_list_table_checkbox_terror" type="checkbox" checked onchange="changeConfig(event,'terror')" />涉暴</label>
+                    <label for="wa_list_table_checkbox_politician"><input id="wa_list_table_checkbox_politician" type="checkbox" checked onchange="changeConfig(event,'politician')" />涉政</label>        
+                </div>
                 <button id="wa_list_filter_submit" class="btn-primary" onclick="reloadData()">获取数据</button>
             </div>
             <!-- <div>
@@ -39,7 +44,14 @@
         <div id="wa_list_operation_bar">
             <p id="wa_list_result_num">检索结果，共计：<span></span> 条记录</p>
             <input type="text" />
-            <button class="btn-info" onclick="getLinks(event)">复制选中链接</button>
+            <div>
+                <button class="btn-info" onclick="getLinks(event)">复制选中链接</button>
+                <button class="btn-info" onclick="exportTrigger(event)">导出选中数据</button>
+            </div>
+        </div>
+
+        <div id="wa_list_operation_checkbox">
+            <label for="wa_list_operation_checkall"><input id="wa_list_operation_checkall" type="checkbox" onchange="toggleCheckAll(event)" ／> 全选</label>
         </div>
 
         <div id="wa_list_table_container">

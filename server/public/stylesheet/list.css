@@ -14,6 +14,23 @@ section > div {
   border-radius: 5px;
   border: 1px solid #aaa;
 }
+#wa_list_filter_bar > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#wa_list_filter_bar > div label {
+  padding: .5rem;
+}
+#wa_list_filter_bar > div label input {
+  margin: 0 .5rem 0 0;
+}
+#wa_list_filter_bar > div > div {
+  height: 100%;
+  background: #eee;
+  padding: .5rem 1rem;
+  border-left: 1px solid #ccc;
+}
 #wa_list_filter_bar > button {
   margin-left: 1rem;
   height: min-content;
@@ -31,16 +48,23 @@ table#wa_list_table {
 }
 table#wa_list_table td,
 table#wa_list_table th {
-  width: 10%;
+  width: 5%;
   padding: .5rem;
   border: 1px solid #00a7de56;
   text-align: center;
-  word-wrap: break-word;
-  word-break: break-all;
+  white-space: nowrap;
 }
 table#wa_list_table td img,
-table#wa_list_table th img {
+table#wa_list_table th img,
+table#wa_list_table td video,
+table#wa_list_table th video {
   width: 10rem;
+}
+table#wa_list_table td.wa-list-table-wordwrap,
+table#wa_list_table th.wa-list-table-wordwrap {
+  word-wrap: break-word;
+  word-break: break-all;
+  white-space: normal;
 }
 table#wa_list_table tr {
   color: #444;
@@ -269,6 +293,9 @@ table#wa_list_table .wa-list-table-extendpanel div table th {
   color: white;
   width: 1px;
 }
-#wa_list_operation_bar button {
-  height: min-content;
+#wa_list_operation_checkbox {
+  padding: .5rem;
+}
+#wa_list_operation_checkbox label:hover {
+  cursor: pointer;
 }
