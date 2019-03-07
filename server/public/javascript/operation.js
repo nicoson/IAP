@@ -122,7 +122,7 @@ function fillListTable(ele, data, isAppend=false) {
 
     for(let i in data) {
         list += `<tr class="wa-list-table-tr-main" data-ind="${PAGENUM*PAGESIZE + Number(i)}">
-                    <td><input type="checkbox" class="js-wa-operation-checkbox" data-url="${data[i].url}" data-index=${i} />&nbsp;${PAGENUM*PAGESIZE + Number(i) + 1}</td>
+                    <td><input type="checkbox" class="js-wa-operation-checkbox" data-url="${data[i].url}" data-index=${PAGENUM*PAGESIZE + Number(i)} />&nbsp;${PAGENUM*PAGESIZE + Number(i) + 1}</td>
                     <td>${new Date(data[i].create_date).toJSON().slice(0,19).replace('T', '<br />')}</td>
                     <td>${new Date(data[i].update_date).toJSON().slice(0,19).replace('T', '<br />')}</td>
                     <td class="wa-list-table-wordwrap"><a href="${data[i].url}" target="_blank">${data[i].url}</td>

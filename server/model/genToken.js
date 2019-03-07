@@ -3,8 +3,9 @@ const qiniu = require("qiniu");
 // const accessKey = "yvkBAhylLK6HTrhU644UcFiVeFhRMR4geKGB1Prt";
 // const secretKey = "1Kfm9tUJURJWxYFHWL1X-HuVVFMMEPwn2S4j5EoW";
 
-const accessKey = "UQGWo-wxlNoVY6WSjHpnNCPEKGZ3F4iaiQgqONAQ";
-const secretKey = "VVgmkRHhuq57Kwwlk8cUKt7DyHcN3bDJQZLlTqHl";
+// account: gr@qiniu.com
+const accessKey = "ljZn6Iv-DilvkOI1o3ztoz-9sW5bZ2mV-Lpi9EKf";
+const secretKey = "m5r3FcGjQWAOvAn6vWKG9Vxq6j1cUsFgbJBuUCbp";
 
 class genToken {
     constructor() {

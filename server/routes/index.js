@@ -195,9 +195,7 @@ router.post('/updatefusionstatusbydomain', function(req, res, next) {
 \* ====================== */
 //  atlabhelper
 router.get('/debug', function(req, res, next) {
-  sjob.getDebug().then(data => {
-    res.send(data);
-  }).catch(err => res.send(err));
+  res.send(sjob.getDebug());
 });
 
 /*=====================*\

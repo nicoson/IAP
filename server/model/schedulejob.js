@@ -2,7 +2,7 @@ const schedule = require('node-schedule');
 const fusionHelper = require('./fusionhelper');
 const atlabHelper = require('./atlabhelper');
 let fh = new fusionHelper();
-const ah = new atlabHelper();
+let ah = new atlabHelper();
 
 // use UTC time zone
 class scheduleJob {
@@ -104,8 +104,9 @@ class scheduleJob {
     }
 
     getDebug() {
+        // console.log('schedule debug: ', ah);
         return {
-            joblist: ah.videoJobList,
+            joblist: Array.from(ah.videoJobList),
             catcherr: ah.errCatchInfo
         }
     }

@@ -4,6 +4,9 @@ const genToken  = require('./genToken');
 const CONFIG = require('./config');
 let gt = new genToken();
 
+const IMGCONCURRENCY = 50;
+const VIDEOCONCURRENCY = 20;
+
 class atlabHelper {
     constructor() {
         this.options = {
@@ -143,13 +146,14 @@ class atlabHelper {
         }
     }
 
-    videoJobControl() {
-        let concurrency = 100;
+    async videoJobControl() {
+        let concurrency = VIDEOCONCURRENCY;
         let interval = 500;
         if(this.videoJobList.size >= concurrency) interval = 30000;
-        this.videoCensorCall(concurrency).then(e => {});
+        await this.videoCensorCall(concurrency).then(e => {});
         console.log(`[INFO] |** atlabhelper.videoJobControl <${new Date()}> **| current pool size: ${this.videoJobList.size}`);
         setTimeout(function(){this.videoJobControl();}.bind(this), interval);
+        return;
     }
 
     async videoJobCheckControl() {
@@ -159,7 +163,7 @@ class atlabHelper {
             interval = 30000;
         } else {
             for(let jobid of this.videoJobList) {
-                await this.videoResultCheck(jobid).then(e => {});
+                await this.videoResultCheck(jobid).then(e => {}).catch(err => console.log('job control check error: ', err));
                 await this.sleep(1000);
             }
         }
@@ -216,7 +220,7 @@ class atlabHelper {
 
     async videoResultCheck(jobid = null) {
         try {
-            if(this.videoJobList.size == 0 && jobid == null) return 'no jobs';
+            if(this.videoJobList.size == 0 || jobid == null) return 'no jobs';
 
             let jobinfo = this.videoJobInfo[jobid];
             let url = `${CONFIG.CENSORVIDEOJOBAPI}/${jobid}`;
@@ -229,7 +233,7 @@ class atlabHelper {
             // console.log('options: ', options);
             if(this.videoJobList.size > 0) {
                 let res = await fetch(url, options).then(e => e.json()).catch(err => console.log('err: ', err));
-                // console.log('video result check: ', JSON.stringify(res));
+                console.log(`[INFO] |** atlabhelper.videoResultCheck <${new Date()}> **| Job status: ${res.status} \n`);
                 this.resVideoHandler(res, jobinfo);
                 let operations = [{
                     updateOne: {
@@ -241,15 +245,16 @@ class atlabHelper {
                 // console.log('operations: ', JSON.stringify(operations));
                 if(res.status == 'FINISHED') {
                     if(jobinfo.isillegal == 1) {
+                        // console.log(`[INFO] |** atlabhelper.videoResultCheck <${new Date()}> **| save illegal table.`);
                         await DBConn.updateData('illegal', operations).catch(err => console.log(`[ERROR] |** atlabhelper.videoResultCheck update illegal table error <${new Date()}> **| data update failed due to: ${err}`));
                     }
+                    console.log('[INFO] |** atlabhelper.videoResultCheck <${new Date()}> **| this video looks good ......... ');
                 } else if (res.status == 'FAILED') {
                     console.log('audit video failed ......... ');
                 } else if (typeof(res.error) != 'undefined') {
-                    console.log('video file lost ......... ');
+                    console.log('video file no longer exists ......... ');
                 } else {
                     // not finished, skip to wait
-                    console.log(`[INFO] |** atlabhelper.videoResultCheck <${new Date()}> **| Job info: ${res}`);
                     return res;
                 }
                 await DBConn.updateData('url', operations).catch(err => console.log(`[ERROR] |** atlabhelper.videoResultCheck update url table error <${new Date()}> **| data update failed due to: ${err}`));
@@ -263,6 +268,7 @@ class atlabHelper {
         }
         catch(err) {
             this.errCatchInfo = err;
+            console.log(`[INFO] |** atlabhelper.videoResultCheck <${new Date()}> **| video result check body error: ${err}`);
         }
         return 'no jobs';
     }
@@ -291,7 +297,7 @@ class atlabHelper {
         };});
 
         let insertion = operations.filter(e => {
-            return e.updateOne.update['$set'].isillegal != 0;
+            return e.updateOne.update['$set'].isillegal == 1;
         });
 
         DBConn.updateData('url', operations).then(e => {
@@ -380,7 +386,7 @@ class atlabHelper {
                 if(data.result.result.scenes.pulp.suggestion != 'pass') {
                     type.push('色情');
                     scorelist.push(data.result.result.scenes.pulp.cuts.reduce((score, e) => {
-                        if(e.details[0].suggestion!='pass'){
+                        if(e.suggestion!='pass'){
                             return Math.max(e.details[0].score, score);
                         }else{
                             return score;
@@ -390,7 +396,7 @@ class atlabHelper {
                 if(data.result.result.scenes.terror.suggestion != 'pass') {
                     type.push('暴力');
                     scorelist.push(data.result.result.scenes.terror.cuts.reduce((score, e) => {
-                        if(e.details[0].suggestion!='pass'){
+                        if(e.suggestion!='pass'){
                             return Math.max(e.details[0].score, score);
                         }else{
                             return score;
@@ -413,19 +419,21 @@ class atlabHelper {
                 jobinfo.machineresult = data.result;
                 jobinfo.status = 1;
             }
+            console.log('inference finished');
         } else if(data.status == 'FAILED') {
             jobinfo.illegaltype = 'audit process failed';
             jobinfo.isillegal = 0;
             jobinfo.score = 0;
             jobinfo.machineresult = -1;
             jobinfo.status = 1;
+            console.log('inference failed');
         } else if(typeof(data.error) != 'undefined') {
             jobinfo.illegaltype = data.error;
             jobinfo.isillegal = 0;
             jobinfo.score = 0;
             jobinfo.machineresult = -1;
             jobinfo.status = 1;
-            console.log('inference error');
+            console.log('inference issue');
         }
     }
 
