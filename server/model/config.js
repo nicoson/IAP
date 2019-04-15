@@ -1,7 +1,9 @@
 module.exports = {
     // Product Env (Qiniu iap-mongo 华东二区)
-    MONGODB:        "mongodb://180.97.147.185:27017",
+    // MONGODB:        "mongodb://iaproot:iapqnai123@180.97.147.185:27017/iap",
+    // MONGODB:        "mongodb://180.97.147.185:27017",
     // MONGODB:        "mongodb://localhost:27017",
+    MONGODB:        "mongodb://iap-mongo:27017",
     DATABASE:       "iap",
 
     //  kodo acss api

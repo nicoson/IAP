@@ -1,5 +1,6 @@
+let APIHOST = '';
 // let APIHOST = 'http://localhost:3000';
-let APIHOST = 'http://bocaqh5wg0g9.kegate-xs.cloudappl.com';
+// let APIHOST = 'http://bocaqh5wg0g9.kegate-xs.cloudappl.com';
 
 let headers = new Headers();
 headers.append('Content-Type', 'application/json');

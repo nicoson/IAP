@@ -14,6 +14,9 @@ set global max_allowed_packet=1000000000;
 #set docker hub account
 1381102897 avaprd@qiniu.com
 
+#set rong qi yun account
+gr@qiniu.com	i7Niu!@#$
+
 #code check
 "model/DBConnection.js" should change to PROD env before deploy
 

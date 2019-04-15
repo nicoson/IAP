@@ -70,7 +70,7 @@ function fillListTable(data) {
         list += `<tr class="wa-list-table-tr-main" onclick="toggleTableRow(event)" data-ind="${i}">
                     <td>${Number(i)+1}</td>
                     <td>${data[i].updated_at.slice(0,19).replace('T', ' ')}</td>
-                    <td><p>${data[i].filename}</p></td>
+                    <td class="wa-list-table-wordwrap"><p>${data[i].filename}</p></td>
                     <td>${data[i].mimeType}</td>
                     <td>${data[i].type}</td>
                     <td>${getFullTime(data[i].putTime/10000)}</td>
