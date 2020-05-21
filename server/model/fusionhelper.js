@@ -8,7 +8,7 @@ const CONFIG = require('./config');
 const DEFTONEHOST = CONFIG.DEFTONEHOST;     // get active domain for specified day
 const FUSIONHOST = CONFIG.FUSIONHOST;       // get top 100 for domain
 const FUSIONDOMAIN = CONFIG.FUSIONDOMAIN;   // get uid by domain
-const TOPN = 10;                            // count top N urls for each Domain
+const TOPN = 100;                            // count top N urls for each Domain
 
 class fusionHelper {
     constructor() {

@@ -9,5 +9,5 @@ Deploy:
 
 	# push to goverment 此处拼错，将错就错
 	docker login reg.qiniu.com -u gr@qiniu.com -p '7Niu!@#$$'
-	docker tag iap reg.qiniu.com/goverment/iap:v1.0
-	docker push reg.qiniu.com/goverment/iap:v1.0
+	docker tag iap reg.qiniu.com/goverment/iap:v1.3
+	docker push reg.qiniu.com/goverment/iap:v1.3

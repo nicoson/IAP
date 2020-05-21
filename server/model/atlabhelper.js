@@ -58,7 +58,7 @@ class atlabHelper {
     async censorBatch(size=1000, concurrency=50) {
         try {
             return new Promise(function(resolve, reject) {
-                DBConn.queryData('url', {status: null}, size).then(async function(data){
+                DBConn.queryData('url', {status: null}, size, 0, '_id', -1).then(async function(data){
                     if(data.length == 0) {
                         resolve({
                             code: 204,
@@ -175,7 +175,7 @@ class atlabHelper {
     async videoCensorCall(concurrency=100) {
         if(this.videoJobList.size >= concurrency) return;
         try {
-            let data = await DBConn.queryData('url', {$and: [{url: /\.rm|\.mp4|\.avi|\.wmv|\.3gp/}, {$or: [{status: null}, {machineresult: -2}]}]}, 1, this.videoJobList.size);
+            let data = await DBConn.queryData('url', {$and: [{url: /\.rm|\.mp4|\.avi|\.wmv|\.3gp/}, {$or: [{status: null}, {machineresult: -2}]}]}, 1, this.videoJobList.size, '_id', -1);
             if(data.length == 0) {
                 console.log(`[INFO] |** atlabhelper.videoCensorCall video call <${new Date()}> **| no more video files in url table!`);
                 return;
@@ -223,6 +223,7 @@ class atlabHelper {
             if(this.videoJobList.size == 0 || jobid == null) return 'no jobs';
 
             let jobinfo = this.videoJobInfo[jobid];
+            delete jobinfo['_id'];
             let url = `${CONFIG.CENSORVIDEOJOBAPI}/${jobid}`;
             let options = {
                 method: 'GET',
@@ -246,7 +247,10 @@ class atlabHelper {
                 if(res.status == 'FINISHED') {
                     if(jobinfo.isillegal == 1) {
                         // console.log(`[INFO] |** atlabhelper.videoResultCheck <${new Date()}> **| save illegal table.`);
-                        await DBConn.updateData('illegal', operations).catch(err => console.log(`[ERROR] |** atlabhelper.videoResultCheck update illegal table error <${new Date()}> **| data update failed due to: ${err}`));
+                        await DBConn.updateData('illegal', operations).catch(err => {
+                            console.log(`[ERROR] |** atlabhelper.videoResultCheck update illegal table error <${new Date()}> **| data update failed due to: ${err}`)
+                            console.log('operations: ', operations);
+                        });
                     }
                     console.log('[INFO] |** atlabhelper.videoResultCheck <${new Date()}> **| this video looks good ......... ');
                 } else if (res.status == 'FAILED') {
